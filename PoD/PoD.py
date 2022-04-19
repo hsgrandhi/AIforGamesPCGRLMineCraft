@@ -42,6 +42,53 @@ def readSingleCubes(minPoint, maxPoint):
                 )))
     return outputBlock 
 
+def spawnFlyingMachine():
+    client.spawnBlocks(Blocks(blocks=[  # Spawn a flying machine
+        # Lower layer
+        Block(position=Point(x=1, y=5, z=1), type=CLAY, orientation=NORTH),
+        Block(position=Point(x=1, y=5, z=0), type=GLASS, orientation=NORTH),
+        Block(position=Point(x=1, y=5, z=-1), type=BRICK_BLOCK, orientation=SOUTH),
+        Block(position=Point(x=1, y=5, z=-2), type=STONE, orientation=NORTH),
+        Block(position=Point(x=1, y=5, z=-4), type=SLIME, orientation=NORTH),
+        # Upper layer
+        Block(position=Point(x=1, y=6, z=0), type=REDSTONE_BLOCK, orientation=NORTH),
+        Block(position=Point(x=1, y=6, z=-4), type=REDSTONE_BLOCK, orientation=NORTH),
+        # Activate
+        Block(position=Point(x=1, y=6, z=-1), type=QUARTZ_BLOCK, orientation=NORTH),
+        
+    ]))
+
+def locateMinMax(minPoint, maxPoint):
+
+    minX = maxPoint.x
+    maxX = minPoint.x
+    minY = maxPoint.y
+    maxY = minPoint.y
+    minZ = maxPoint.z
+    maxZ = minPoint.z
+
+    print ("original min point is: ", minX, " ", minY, " ", minZ)
+    print ("original max point is: ", maxX, " ", maxY, " ", maxZ)
+    allCubes = client.readCube(Cube(min=minPoint,max=maxPoint))
+
+    for cube in allCubes.blocks:
+        #print (cube.type)
+        # 5 is the air block
+        if cube.type != 5:
+        
+            minX = min(cube.position.x, minX)
+            minY = min(cube.position.y, minY)
+            minZ = min(cube.position.z, minZ)
+
+            maxX = max(cube.position.x, maxX)
+            maxY = max(cube.position.y, maxY)
+            maxZ = max(cube.position.z, maxZ)
+        
+
+
+    outputTuple = (Point(x = minX, y = minY, z = minZ), 
+                    Point(x = maxX, y = maxY, z = maxZ))
+    return outputTuple
 """
 #use together with the block read function
 def sizeFinder(readInBlocks, minPoint, maxPoint):
@@ -97,7 +144,7 @@ if __name__ == '__main__':
     #clear out a 1000 * 18 * 1000 area
     clearMin = Point(x=-500, y=4, z=-500)
     clearMax = Point(x=500, y=14, z=500)
-    clearOut(clearMin, clearMax)
+    #clearOut(clearMin, clearMax)
     
 
 
@@ -106,32 +153,30 @@ if __name__ == '__main__':
     
 
    
-    client.spawnBlocks(Blocks(blocks=[  # Spawn a flying machine
-        # Lower layer
-        Block(position=Point(x=1, y=5, z=1), type=CLAY, orientation=NORTH),
-        Block(position=Point(x=1, y=5, z=0), type=GLASS, orientation=NORTH),
-        Block(position=Point(x=1, y=5, z=-1), type=BRICK_BLOCK, orientation=SOUTH),
-        Block(position=Point(x=1, y=5, z=-2), type=STONE, orientation=NORTH),
-        Block(position=Point(x=1, y=5, z=-4), type=SLIME, orientation=NORTH),
-        # Upper layer
-        Block(position=Point(x=1, y=6, z=0), type=REDSTONE_BLOCK, orientation=NORTH),
-        Block(position=Point(x=1, y=6, z=-4), type=REDSTONE_BLOCK, orientation=NORTH),
-        # Activate
-        Block(position=Point(x=1, y=6, z=-1), type=QUARTZ_BLOCK, orientation=NORTH),
-        
-    ]))
-
+    
+#x varies 50 - 53, z vaires -20 - 40, y varies 2 - 6
+#load_coord=(50,10,1)
+#the load coordinate function is have x, z, y instead
         
     blocks = client.readCube(Cube(
-        min=Point(x=1, y=5, z=-4),
-        max=Point(x=1, y=6, z=1)
+        min=Point(x=50, y=2, z=10),
+        max=Point(x=53, y=6, z=15)
     ))
 
-    testPoint = Point(x = 0, y=0, z=0)
-    testPoint.x = testPoint.x - 5
-    print(testPoint.x)
+    #print(blocks)
+    minMax = locateMinMax(Point(x=40, y=5, z=8), Point(x=58, y=6, z=20))
+    print(minMax)
+
+
+
+
+
+
+
+
+    
     #example syntax to use the readCube result, Blocks type obj
-    print (blocks.blocks[0].type)
+    #print (blocks.blocks[0].type)
 
 
 
