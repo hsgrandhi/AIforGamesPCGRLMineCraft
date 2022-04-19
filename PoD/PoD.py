@@ -90,27 +90,11 @@ def locateMinMax(minPoint, maxPoint):
     outputTuple = (Point(x = minX, y = minY, z = minZ), 
                     Point(x = maxX, y = maxY, z = maxZ))
     return outputTuple
-"""
-#use together with the block read function
-def sizeFinder(readInBlocks, minPoint, maxPoint):
-    xmin = -1000
-    xmax = 1000
-    ymin = -1000
-    ymax = 1000
-    zmin = -1000
-    zmax = 1000
-    
-    blocks = client.readCube(Cube(
-        min=Point(x=1, y=5, z=-4),
-        max=Point(x=1, y=6, z=1)
-    ))
-    return
-"""
 
-
+"""
 #before switching, the range for blocks need to be set.
 #same as fill cube but instead given a chance to fill also fill type is random.
-def destroyer(minPoint, maxPoint):
+def destroyerMK1(minPoint, maxPoint):
     print("destroyer is running")
     outputList = []
     for i in range (minPoint.x, maxPoint.x + 1):
@@ -139,6 +123,8 @@ def destroyer(minPoint, maxPoint):
 
     return outputList
     
+
+"""
 
 if __name__ == '__main__':
 
