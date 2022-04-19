@@ -73,8 +73,9 @@ def locateMinMax(minPoint, maxPoint):
 
     for cube in allCubes.blocks:
         #print (cube.type)
-        # 5 is the air block
-        if cube.type != 5:
+        # 5 is the air block, 10 is bedrock
+        # exclude air, bedrock and dirt
+        if cube.type != 5 and cube.type != 10 and cube.type != 93 and cube.type != 60:
         
             minX = min(cube.position.x, minX)
             minY = min(cube.position.y, minY)
@@ -164,7 +165,7 @@ if __name__ == '__main__':
     ))
 
     #print(blocks)
-    minMax = locateMinMax(Point(x=40, y=5, z=8), Point(x=58, y=6, z=20))
+    minMax = locateMinMax(Point(x=40, y=0, z=0), Point(x=60, y=6, z=30))
     print(minMax)
 
 
