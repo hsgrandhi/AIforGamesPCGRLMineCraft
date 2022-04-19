@@ -22,16 +22,16 @@ nbt_path = "{}/plain_village_house.nbt".format(base_nbt_path)
 
 blocks, unique_vals, target, color_dict, unique_val_dict = MinecraftClient.load_entity("Apartment", nbt_path=nbt_path, load_coord=(50,10,1))
 
-# print(blocks)
+print(blocks)
 
-client.fillCube(FillCubeRequest(  # Clear a 20x10x20 working area
-    cube=Cube(
-        min=Point(x=-0, y=0, z=-0),
-        max=Point(x=0, y=0, z=0)
-    ),
-    type=SLIME,
-    size=5
-))
+# client.fillCube(FillCubeRequest(  # Clear a 20x10x20 working area
+#     cube=Cube(
+#         min=Point(x=-0, y=0, z=-0),
+#         max=Point(x=0, y=0, z=0)
+#     ),
+#     type=SLIME,
+#     size=5
+# ))
 # client.spawnBlocks(Blocks(blocks=[  # Spawn a flying machine
 #     # Lower layer
 #     Block(position=Point(x=1, y=5, z=1), type=PISTON, orientation=NORTH),
@@ -46,11 +46,11 @@ client.fillCube(FillCubeRequest(  # Clear a 20x10x20 working area
 #     Block(position=Point(x=1, y=6, z=-1), type=QUARTZ_BLOCK, orientation=NORTH),
 # ]))
 
-client.spawnBlocks(Blocks(blocks=blocks))
+# client.spawnBlocks(Blocks(blocks=blocks))
 
-blocks = client.readCube(Cube(
-    min=Point(x=1, y=1, z=-1),
-    max=Point(x=1, y=1, z=1)
-))
+# blocks = client.readCube(Cube(
+#     min=Point(x=1, y=1, z=-1),
+#     max=Point(x=1, y=1, z=1)
+# ))
 
 # print(blocks)
