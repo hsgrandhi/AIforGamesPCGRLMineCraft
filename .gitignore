@@ -1,0 +1,4 @@
+mods/
+__pycache__/
+*.json
+*.jar
