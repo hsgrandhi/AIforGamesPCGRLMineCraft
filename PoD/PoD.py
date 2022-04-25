@@ -8,9 +8,18 @@ from minecraft_pb2 import *
 import random
 import numpy as np
 
+from DestroyAgent import PoDAgent
+
 channel = grpc.insecure_channel('localhost:5001')
 client = minecraft_pb2_grpc.MinecraftServiceStub(channel)
 
+"""
+*********** NOTICE **********
+So as for the read in result, it traverse in this order for all Blocks.blocks[0] to [size]
+first z will be first to move, then next on the list is y. Finally it's x.
+Sothe output maybe a bit in quite a different order than expected
+******************************
+"""
 
 def ravel_index(x, dims):
     i = 0
@@ -67,8 +76,8 @@ def locateMinMax(minPoint, maxPoint):
     minZ = maxPoint.z
     maxZ = minPoint.z
 
-    print ("original min point is: ", minX, " ", minY, " ", minZ)
-    print ("original max point is: ", maxX, " ", maxY, " ", maxZ)
+    #print ("original min point is: ", minX, " ", minY, " ", minZ)
+    #print ("original max point is: ", maxX, " ", maxY, " ", maxZ)
     allCubes = client.readCube(Cube(min=minPoint,max=maxPoint))
 
     for cube in allCubes.blocks:
@@ -90,6 +99,16 @@ def locateMinMax(minPoint, maxPoint):
     outputTuple = (Point(x = minX, y = minY, z = minZ), 
                     Point(x = maxX, y = maxY, z = maxZ))
     return outputTuple
+
+def generateStep(lowBound, highBound, agentAction):
+    print ("generating step")
+    blocks = client.readCube(Cube(
+        min=lowBound,
+        max=highBound
+    ))
+
+
+    
 
 """
 #before switching, the range for blocks need to be set.
@@ -144,22 +163,33 @@ if __name__ == '__main__':
 #x varies 50 - 53, z vaires -20 - 40, y varies 2 - 6
 #load_coord=(50,10,1)
 #the load coordinate function is have x, z, y instead
+
         
     blocks = client.readCube(Cube(
         min=Point(x=50, y=2, z=10),
         max=Point(x=53, y=6, z=15)
     ))
-
     #print(blocks)
+    #print(blocks.blocks[0])
+
+
+
+    
     minMax = locateMinMax(Point(x=40, y=0, z=0), Point(x=60, y=6, z=30))
-    print(minMax)
+    #print(minMax)
+    woodCabin = client.readCube(Cube(
+        min=minMax[0],
+        max=minMax[1]
+    ))
 
 
+    agent = PoDAgent(minMax[0], minMax[1])
+    
 
 
-
-
-
+    while not agent.reachEnd:
+        agent.takeAction()
+   
 
     
     #example syntax to use the readCube result, Blocks type obj

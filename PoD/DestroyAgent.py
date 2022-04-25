@@ -27,7 +27,7 @@ class PoDAgent:
         217 = "STONE"
         """
         self.selectedTiles = [45, 23, 217]
-
+        self.reachEnd = False
 
     # position argument needs a Point type instance, selectedType can be int or string
     def singleBlockChange (self, position, selectedType):
@@ -41,8 +41,46 @@ class PoDAgent:
 
         return blocks.blocks[0].type
     
-    # take a random action then return the reversed action for record
     def takeAction(self):
+        print ("action is taken")
+        coinToss = random.randint(0, 100)
+        
+        #currentX = self.minBoundary.x
+        #currentY = self.minBoundary.y
+        #currentZ = self.minBoundary.z
+        print("original location is: ", self.currPosition)
+
+        action = self.getBlockType(self.currPosition)
+        #proceed to take next step of destruction
+        #Destruction traverse order is: z -> y -> x
+        if coinToss <= self.coinFlip:
+            #block will be changed to one of the type in tile Selection
+            randomTile = random.randint(0, 2)
+            tileChangeTo = self.selectedTiles[randomTile]
+            self.singleBlockChange(self.currPosition, tileChangeTo)
+        #after change or not move on to next target
+        if self.currPosition.z + 1 < self.maxBoundary.z:
+            self.currPosition.z += 1
+        elif self.currPosition.y + 1 < self.maxBoundary.y:
+            self.currPosition.z = 0
+            self.currPosition.y += 1
+        elif self.currPosition.x + 1 < self.maxBoundary.x:
+            self.currPosition.z = 0
+            self.currPosition.y = 0
+            self.currPosition.x += 1
+        #meet maxBoundary
+        else:
+            print("boundary reached")
+            self.reachEnd = True
+            return -1
+
+        print("new location is: ", self.currPosition)
+
+         
+
+        return action
+    #take a random action then return the reversed action for record
+    def takeRandomAction(self):
         coinToss = random.randint(0, 100)
         if coinToss <= self.coinFlip:
             randomTile = random.randint(0, 2)
