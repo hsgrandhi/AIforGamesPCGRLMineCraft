@@ -22,7 +22,7 @@ nbt_path = "{}/plain_village_house.nbt".format(base_nbt_path)
 
 blocks, unique_vals, target, color_dict, unique_val_dict = MinecraftClient.load_entity("Apartment", nbt_path=nbt_path, load_coord=(50,10,1))
 
-print(blocks)
+# print(blocks)
 
 # client.fillCube(FillCubeRequest(  # Clear a 20x10x20 working area
 #     cube=Cube(
