@@ -13,7 +13,7 @@ channel = grpc.insecure_channel('localhost:5001')
 client = minecraft_pb2_grpc.MinecraftServiceStub(channel)
 
 # get the boundries positions of the building
-minMax = locateMinMax(Point(x=40, y=0, z=0), Point(x=60, y=6, z=30))
+minMax = locateMinMax(Point(x=50, y=2, z=10), Point(x=53, y=6, z=15))
 print(minMax, "minMax")
 
 # read all the blocks in the range

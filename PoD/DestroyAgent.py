@@ -1,3 +1,4 @@
+from copy import deepcopy
 import grpc
 
 import minecraft_pb2_grpc
@@ -19,7 +20,7 @@ class PoDAgent:
         self.maxBoundary = maxBound
 
         #start from minboundary to move the agent
-        self.currPosition = self.minBoundary
+        self.currPosition = deepcopy(self.minBoundary) 
         
         """
         45 = "CONCRETE"
@@ -31,6 +32,7 @@ class PoDAgent:
 
     # position argument needs a Point type instance, selectedType can be int or string
     def singleBlockChange (self, position, selectedType):
+        print("position to change is: ", position)
         client.fillCube(FillCubeRequest(cube=Cube(
                         min = position,
                         max = position
@@ -42,13 +44,14 @@ class PoDAgent:
         return blocks.blocks[0].type
     
     def takeAction(self):
-        print ("action is taken")
+        #print ("action is taken")
         coinToss = random.randint(0, 100)
-        
+        print("agent min is: ", self.minBoundary)
+        print("agent max is: ", self.maxBoundary)
         #currentX = self.minBoundary.x
         #currentY = self.minBoundary.y
         #currentZ = self.minBoundary.z
-        print("original location is: ", self.currPosition)
+        #print("original location is: ", self.currPosition)
 
         action = self.getBlockType(self.currPosition)
         #proceed to take next step of destruction
@@ -59,14 +62,15 @@ class PoDAgent:
             tileChangeTo = self.selectedTiles[randomTile]
             self.singleBlockChange(self.currPosition, tileChangeTo)
         #after change or not move on to next target
-        if self.currPosition.z + 1 < self.maxBoundary.z:
+        if self.currPosition.z + 1 < self.maxBoundary.z + 1:
             self.currPosition.z += 1
-        elif self.currPosition.y + 1 < self.maxBoundary.y:
-            self.currPosition.z = 0
+        elif self.currPosition.y + 1 < self.maxBoundary.y + 1:
+            #print("z should reset")
+            self.currPosition.z = self.minBoundary.z
             self.currPosition.y += 1
-        elif self.currPosition.x + 1 < self.maxBoundary.x:
-            self.currPosition.z = 0
-            self.currPosition.y = 0
+        elif self.currPosition.x + 1 < self.maxBoundary.x + 1:
+            self.currPosition.z = self.minBoundary.z
+            self.currPosition.y = self.minBoundary.y
             self.currPosition.x += 1
         #meet maxBoundary
         else:
@@ -74,7 +78,7 @@ class PoDAgent:
             self.reachEnd = True
             return -1
 
-        print("new location is: ", self.currPosition)
+        #print("new location is: ", self.currPosition)
 
          
 

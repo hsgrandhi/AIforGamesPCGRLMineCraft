@@ -85,6 +85,7 @@ def locateMinMax(minPoint, maxPoint):
         # 5 is the air block, 10 is bedrock
         # exclude air, bedrock and dirt
         if cube.type != 5 and cube.type != 10 and cube.type != 93 and cube.type != 60:
+        #if cube.type != 5 and cube.type != 93:
         
             minX = min(cube.position.x, minX)
             minY = min(cube.position.y, minY)
@@ -100,12 +101,15 @@ def locateMinMax(minPoint, maxPoint):
                     Point(x = maxX, y = maxY, z = maxZ))
     return outputTuple
 
-def generateStep(lowBound, highBound, agentAction):
+def generateStep(agent):
     print ("generating step")
+    agentAction = agent.takeAction()
     blocks = client.readCube(Cube(
-        min=lowBound,
-        max=highBound
+        min=agent.minBoundary,
+        max=agent.maxBoundary
     ))
+    output = (blocks, agentAction)
+    return output
 
 
     
@@ -147,10 +151,7 @@ def destroyerMK1(minPoint, maxPoint):
 
 if __name__ == '__main__':
 
-    #clear out a 1000 * 18 * 1000 area
-    clearMin = Point(x=-500, y=4, z=-500)
-    clearMax = Point(x=500, y=14, z=500)
-    #clearOut(clearMin, clearMax)
+   
     
 
 
@@ -164,34 +165,39 @@ if __name__ == '__main__':
 #load_coord=(50,10,1)
 #the load coordinate function is have x, z, y instead
 
-        
-    blocks = client.readCube(Cube(
-        min=Point(x=50, y=2, z=10),
-        max=Point(x=53, y=6, z=15)
+    accurateMin = Point(x=50, y=2, z=10)
+    accurateMax = Point(x=53, y=6, z=15)
+
+    accurateLoc = client.readCube(Cube(
+        min=accurateMin,
+        max=accurateMax
     ))
-    #print(blocks)
-    #print(blocks.blocks[0])
-
-
-
+    #print(accurateLoc)
     
-    minMax = locateMinMax(Point(x=40, y=0, z=0), Point(x=60, y=6, z=30))
-    #print(minMax)
-    woodCabin = client.readCube(Cube(
-        min=minMax[0],
-        max=minMax[1]
-    ))
+    minMax = locateMinMax(accurateMin, accurateMax)
+    #print ("minMax is: ", minMax)
 
-
+  
+    
+    
+    
     agent = PoDAgent(minMax[0], minMax[1])
     
-
-
-    while not agent.reachEnd:
-        agent.takeAction()
-   
-
+    print("agent boundaries: ", agent.minBoundary, agent.maxBoundary)
+    print("agent location: ", agent.currPosition)
     
+    trainingData = []
+
+    #debug
+    
+    while not agent.reachEnd:
+        #agent.takeAction()
+        trainingData.append(generateStep(agent))
+   
+    print(trainingData)
+    
+    
+   
     #example syntax to use the readCube result, Blocks type obj
     #print (blocks.blocks[0].type)
 
