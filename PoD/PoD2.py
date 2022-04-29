@@ -155,10 +155,10 @@ def transformStateActionToCSV(blocks, action):
         writer.writerow(flattenedArray)
 
     # convert array into dataframe
-    DF = pd.DataFrame(flattenedArray)
+#     DF = pd.DataFrame(flattenedArray)
     
-    # save the dataframe as a csv file
-    DF.to_csv("data1.csv", index=False)
+#     # save the dataframe as a csv file
+#     DF.to_csv("data1.csv", index=False)
 
     
 
