@@ -7,11 +7,11 @@ from minecraft_pb2 import *
 
 import random
 import numpy as np
-import pandas as pd
 
 from DestroyAgent import PoDAgent
 
 import csv
+import pandas as pd
 
 channel = grpc.insecure_channel('localhost:5001')
 client = minecraft_pb2_grpc.MinecraftServiceStub(channel)
@@ -114,13 +114,15 @@ def generateStep(agent):
     output = (blocks, agentAction)
     return output
 
-def transformStateActionToCSV(blocks, agentAction):
+def transformStateActionToCSV(blocks, action):
     # connect to the server
     # channel = grpc.insecure_channel('localhost:5001')
     # client = minecraft_pb2_grpc.MinecraftServiceStub(channel)
 
     # get the boundries positions of the building
-    minMax = locateMinMax(Point(x=50, y=2, z=10), Point(x=53, y=6, z=15))
+    
+    # min is 40 2 10, max is 50 12 20
+    # spawn center is 45, 7, 15
     print(minMax, "minMax")
 
     # read all the blocks in the range
@@ -130,12 +132,14 @@ def transformStateActionToCSV(blocks, agentAction):
     # ))
 
     # create a 3D array with the max required dimensions, added + 1 to handle index errors
-    threedArr = np.full((minMax[1].x + 1, minMax[1].y + 1, minMax[1].z + 1), 5)
+    threedArr = np.full((10,10,10), 5)
     print(threedArr.shape)
     for block in blocks.blocks:
-        print(block.position.x, block.position.y, block.position.z)
-        threedArr[block.position.x][block.position.y][block.position.z] = block.type
+        print("block is: ", block.type)
+        print("index is: ", block.position.x-41, block.position.y-3, block.position.z-11)
+        threedArr[block.position.x-41][block.position.y-3][block.position.z-11] = block.type
     print(threedArr)
+    
 
     # flatten the array
     flattenedArray = np.stack(threedArr, axis=1).flatten()
@@ -144,14 +148,18 @@ def transformStateActionToCSV(blocks, agentAction):
     # flattenedArray.append(threedArr.shape)
     # flattenedArray = np.append(flattenedArray, threedArr.shape)
 
-    flattenedArray = np.append(flattenedArray, agentAction)
+    flattenedArray = np.append(flattenedArray, action)
     print(flattenedArray, flattenedArray.shape)
+    with open("buildingData.csv", "a") as f:
+        writer = csv.writer(f)
+        writer.writerow(flattenedArray)
 
     # convert array into dataframe
     DF = pd.DataFrame(flattenedArray)
     
     # save the dataframe as a csv file
     DF.to_csv("data1.csv", index=False)
+
     
 
 """
@@ -214,9 +222,10 @@ if __name__ == '__main__':
     ))
     #print(accurateLoc)
     
-    minMax = locateMinMax(accurateMin, accurateMax)
+    #minMax = locateMinMax(accurateMin, accurateMax)
     #print ("minMax is: ", minMax)
     
+    minMax = [Point(x = 41, y = 3, z = 11), Point(x = 50, y = 12, z = 20)]
 
   
     
