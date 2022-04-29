@@ -32,7 +32,7 @@ class PoDAgent:
 
     # position argument needs a Point type instance, selectedType can be int or string
     def singleBlockChange (self, position, selectedType):
-        print("position to change is: ", position)
+        #print("position to change is: ", position)
         client.fillCube(FillCubeRequest(cube=Cube(
                         min = position,
                         max = position
@@ -46,8 +46,7 @@ class PoDAgent:
     def takeAction(self):
         #print ("action is taken")
         coinToss = random.randint(0, 100)
-        print("agent min is: ", self.minBoundary)
-        print("agent max is: ", self.maxBoundary)
+        
         #currentX = self.minBoundary.x
         #currentY = self.minBoundary.y
         #currentZ = self.minBoundary.z

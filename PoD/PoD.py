@@ -10,6 +10,8 @@ import numpy as np
 
 from DestroyAgent import PoDAgent
 
+import csv
+
 channel = grpc.insecure_channel('localhost:5001')
 client = minecraft_pb2_grpc.MinecraftServiceStub(channel)
 
@@ -102,7 +104,7 @@ def locateMinMax(minPoint, maxPoint):
     return outputTuple
 
 def generateStep(agent):
-    print ("generating step")
+    #print ("generating step")
     agentAction = agent.takeAction()
     blocks = client.readCube(Cube(
         min=agent.minBoundary,
@@ -176,6 +178,7 @@ if __name__ == '__main__':
     
     minMax = locateMinMax(accurateMin, accurateMax)
     #print ("minMax is: ", minMax)
+    
 
   
     
@@ -183,8 +186,7 @@ if __name__ == '__main__':
     
     agent = PoDAgent(minMax[0], minMax[1])
     
-    print("agent boundaries: ", agent.minBoundary, agent.maxBoundary)
-    print("agent location: ", agent.currPosition)
+   
     
     trainingData = []
 
@@ -193,9 +195,44 @@ if __name__ == '__main__':
     while not agent.reachEnd:
         #agent.takeAction()
         trainingData.append(generateStep(agent))
-   
-    print(trainingData)
+
     
+
+    print (trainingData)
+
+    """
+    #print(len(trainingData[0][0].blocks) + 2)
+    outputRow = np.zeros(len(trainingData[0][0].blocks) + 2)
+    output = []
+
+
+    
+    
+    #print(outputRow[len(trainingData[0][0].blocks) + 1])
+
+    for data in trainingData:
+        for i in range (len(data[0].blocks)):
+            
+            temp = data[0].blocks[i].type
+            outputRow[i] = temp
+        
+        outputRow[len(data[0].blocks) + 1] = (data[1])
+        
+        output.append(outputRow)
+
+        print (output)
+
+    
+    
+    with open("out.csv", "w", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerows(output)
+   
+   
+    """
+
+    #print(trainingData)
+   
     
    
     #example syntax to use the readCube result, Blocks type obj

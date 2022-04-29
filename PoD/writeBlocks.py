@@ -13,7 +13,9 @@ channel = grpc.insecure_channel('localhost:5001')
 client = minecraft_pb2_grpc.MinecraftServiceStub(channel)
 
 # get the boundries positions of the building
-minMax = locateMinMax(Point(x=40, y=0, z=0), Point(x=60, y=6, z=30))
+accurateMin = Point(x=50, y=2, z=10)
+accurateMax = Point(x=53, y=6, z=15)
+minMax = locateMinMax(accurateMin, accurateMax)
 print(minMax, "minMax")
 
 # read all the blocks in the range
@@ -43,3 +45,4 @@ DF = pd.DataFrame(flattenedArray)
   
 # save the dataframe as a csv file
 DF.to_csv("data1.csv", index=False)
+
