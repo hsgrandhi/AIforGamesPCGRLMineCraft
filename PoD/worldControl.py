@@ -127,12 +127,10 @@ if __name__ == '__main__':
     #clearMax = Point(x=500, y=14, z=500)
     clearMin = accurateMin
     clearMax = accurateMax
-    clearOut(clearMin, clearMax)
+    blocks = client.readCube(Cube(min = accurateMin, max = accurateMax))
+    print(blocks)
 
-    for i in range(accurateMin.x, accurateMax.x + 1):
-        for j in range(accurateMin.y, accurateMax.y + 1):
-            for k in range(accurateMin.z, accurateMax.z + 1):
-                singleBlockChange(Point(x = i, y = j, z = k), 5)
+    
     
 
 

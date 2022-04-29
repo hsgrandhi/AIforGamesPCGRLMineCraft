@@ -11,10 +11,12 @@ import numpy as np
 from DestroyAgent import PoDAgent
 
 import csv
+import pandas as pd
 
 channel = grpc.insecure_channel('localhost:5001')
 client = minecraft_pb2_grpc.MinecraftServiceStub(channel)
 
+#TODO: fix min max, 
 """
 *********** NOTICE **********
 So as for the read in result, it traverse in this order for all Blocks.blocks[0] to [size]
@@ -103,7 +105,7 @@ def locateMinMax(minPoint, maxPoint):
                     Point(x = maxX, y = maxY, z = maxZ))
     return outputTuple
 
-def generateStep(agent):
+def generateStep(agent, minBound, maxBound):
     #print ("generating step")
     agentAction = agent.takeAction()
     blocks = client.readCube(Cube(
@@ -113,6 +115,51 @@ def generateStep(agent):
     output = (blocks, agentAction)
     return output
 
+def transformStateActionToCSV(blocks, action, minPoint, maxPoint):
+    # connect to the server
+    # channel = grpc.insecure_channel('localhost:5001')
+    # client = minecraft_pb2_grpc.MinecraftServiceStub(channel)
+
+    # get the boundries positions of the building
+    
+    # min is 40 2 10, max is 50 12 20
+    # spawn center is 45, 7, 15
+    print(minMax, "minMax")
+
+    # read all the blocks in the range
+    # blocks = client.readCube(Cube(
+    #     min=Point(x=minMax[0].x, y=minMax[0].y, z=minMax[0].z),
+    #     max=Point(x=minMax[1].x, y=minMax[1].y, z=minMax[1].z)
+    # ))
+
+    # create a 3D array with the max required dimensions, added + 1 to handle index errors
+    threedArr = np.full((20,20,20), 5)
+    print(threedArr.shape)
+    for block in blocks.blocks:
+        print("block is: ", block.type)
+        #print("index is: ", block.position.x-41, block.position.y-3, block.position.z-11)
+        threedArr[block.position.x-minPoint.x][block.position.y-minPoint.y][block.position.z-minPoint.z] = block.type
+    print(threedArr)
+    
+
+    # flatten the array
+    flattenedArray = np.stack(threedArr, axis=1).flatten()
+
+    # add shape data to the flattened array
+    # flattenedArray.append(threedArr.shape)
+    # flattenedArray = np.append(flattenedArray, threedArr.shape)
+
+    flattenedArray = np.append(flattenedArray, action)
+    print(flattenedArray, flattenedArray.shape)
+    with open("buildingData.csv", "a") as f:
+        writer = csv.writer(f)
+        writer.writerow(flattenedArray)
+
+    # convert array into dataframe
+    DF = pd.DataFrame(flattenedArray)
+    
+    # save the dataframe as a csv file
+    DF.to_csv("data1.csv", index=False)
 
     
 
@@ -170,21 +217,24 @@ if __name__ == '__main__':
     accurateMin = Point(x=50, y=2, z=10)
     accurateMax = Point(x=53, y=6, z=15)
 
+    maxBound = Point(x = 41, y = 3, z = 11)
+    minBound = Point(x = 50, y = 12, z = 20)
     accurateLoc = client.readCube(Cube(
         min=accurateMin,
         max=accurateMax
     ))
     #print(accurateLoc)
     
-    minMax = locateMinMax(accurateMin, accurateMax)
+    #minMax = locateMinMax(accurateMin, accurateMax)
     #print ("minMax is: ", minMax)
     
+    minMax = [Point(x = 41, y = 3, z = 11), Point(x = 50, y = 12, z = 20)]
 
   
     
     
     
-    agent = PoDAgent(minMax[0], minMax[1])
+    agent = PoDAgent(accurateMin, accurateMax)
     
    
     
@@ -194,7 +244,9 @@ if __name__ == '__main__':
     
     while not agent.reachEnd:
         #agent.takeAction()
-        trainingData.append(generateStep(agent))
+        step = generateStep(agent, minBound, maxBound)
+        trainingData.append(step, accurateMin, accurateMax)
+        transformStateActionToCSV(step[0], step[1])
 
     
 
