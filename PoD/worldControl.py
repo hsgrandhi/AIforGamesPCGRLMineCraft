@@ -27,13 +27,13 @@ def ravel_index(x, dims):
     return i
 
 #clear out game world, moved platform etc
-def clearOut(minPoint, maxPoint):
+def clearOut(minPoint, maxPoint, cubeType = "AIR"):
     client.fillCube(FillCubeRequest(  # Clear a 20x10x20 working area
         cube=Cube(
             min = minPoint,
             max = maxPoint
         ),
-        type=AIR
+        type=cubeType
     ))
 
 #read cubes n store in a list for easier access
@@ -99,15 +99,7 @@ def locateMinMax(minPoint, maxPoint):
                     Point(x = maxX, y = maxY, z = maxZ))
     return outputTuple
 
-def generateStep(agent):
-    print ("generating step")
-    agentAction = agent.takeAction()
-    blocks = client.readCube(Cube(
-        min=agent.minBoundary,
-        max=agent.maxBoundary
-    ))
-    output = (blocks, agentAction)
-    return output
+
 
 def singleBlockChange (position, selectedType):
         print("position to change is: ", position)
@@ -118,17 +110,31 @@ def singleBlockChange (position, selectedType):
     
 
 
+# Give two coord to reset the world within, Ground will return grass, other will be air.
+def worldReset (minCoord, maxCoord):
+    print("Resetting current world")
+
+    #reset the ground level
+    clearOut(Point(x=minCoord.x, y=0, z=minCoord.z), Point(x=maxCoord.x, y=3, z=maxCoord.z), GRASS)
+
+    #Reset the air level
+    clearOut(Point(x=minCoord.x, y=4, z=minCoord.z), Point(x=maxCoord.x, y=maxCoord.y, z=maxCoord.z), AIR)
+
 if __name__ == '__main__':
 
-    #clear out a 1000 * 18 * 1000 area
-    accurateMin = Point(x=50, y=2, z=10)
-    accurateMax = Point(x=53, y=6, z=15)
-    #clearMin = Point(x=-500, y=4, z=-500)
-    #clearMax = Point(x=500, y=14, z=500)
-    clearMin = accurateMin
-    clearMax = accurateMax
-    blocks = client.readCube(Cube(min = accurateMin, max = accurateMax))
-    print(blocks)
+    
+    #Ground level is from y = 0 to y = 3
+    #Air level starts from y = 4 to above
+    #Made of Grass
+    accurateMin = Point(x=50, y=0, z=10)
+    accurateMax = Point(x=53, y=1, z=15)
+    clearMin = Point(x=-100, y=0, z=-50)
+    clearMax = Point(x=100, y=100, z=50)
+    
+    #clearOut(clearMin, clearMax, GRASS)
+    worldReset(clearMin, clearMax)
+    
+    
 
     
     

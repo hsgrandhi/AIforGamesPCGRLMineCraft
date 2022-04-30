@@ -32,46 +32,24 @@ def ravel_index(x, dims):
         i += j
     return i
 
-#clear out game world, moved platform etc
-def clearOut(minPoint, maxPoint):
+
+def singleBlockChange (position, selectedType):
+        #print("position to change is: ", position)
+        client.fillCube(FillCubeRequest(cube=Cube(
+                        min = position,
+                        max = position
+                    ), type=selectedType))
+
+def clearOut(minPoint, maxPoint, cubeType = "AIR"):
     client.fillCube(FillCubeRequest(  # Clear a 20x10x20 working area
         cube=Cube(
             min = minPoint,
             max = maxPoint
         ),
-        type=AIR
+        type=cubeType
     ))
-
-#read cubes n store in a list for easier access
-def readSingleCubes(minPoint, maxPoint):
-    outputBlock = []
-    tempRead = Blocks()
-    for i in range(minPoint.x, maxPoint.x + 1):
-        for j in range(minPoint.y, maxPoint.y + 1):
-            for k in range(minPoint.z, maxPoint.z + 1):
-                outputBlock.append(client.readCube(Cube(
-                    min = Point(x=i, y=j, z=k),
-                    max = Point(x=i, y=j, z=k)
-                )))
-    return outputBlock 
-
-def spawnFlyingMachine():
-    client.spawnBlocks(Blocks(blocks=[  # Spawn a flying machine
-        # Lower layer
-        Block(position=Point(x=1, y=5, z=1), type=CLAY, orientation=NORTH),
-        Block(position=Point(x=1, y=5, z=0), type=GLASS, orientation=NORTH),
-        Block(position=Point(x=1, y=5, z=-1), type=BRICK_BLOCK, orientation=SOUTH),
-        Block(position=Point(x=1, y=5, z=-2), type=STONE, orientation=NORTH),
-        Block(position=Point(x=1, y=5, z=-4), type=SLIME, orientation=NORTH),
-        # Upper layer
-        Block(position=Point(x=1, y=6, z=0), type=REDSTONE_BLOCK, orientation=NORTH),
-        Block(position=Point(x=1, y=6, z=-4), type=REDSTONE_BLOCK, orientation=NORTH),
-        # Activate
-        Block(position=Point(x=1, y=6, z=-1), type=QUARTZ_BLOCK, orientation=NORTH),
-        
-    ]))
-
-def locateMinMax(minPoint, maxPoint):
+#by default grass and air are excluded, can also be diyed
+def locateMinMax(minPoint, maxPoint, excludingType=[5, 93]):
 
     minX = maxPoint.x
     maxX = minPoint.x
@@ -80,6 +58,7 @@ def locateMinMax(minPoint, maxPoint):
     minZ = maxPoint.z
     maxZ = minPoint.z
 
+    isBanned = False
     #print ("original min point is: ", minX, " ", minY, " ", minZ)
     #print ("original max point is: ", maxX, " ", maxY, " ", maxZ)
     allCubes = client.readCube(Cube(min=minPoint,max=maxPoint))
@@ -87,10 +66,16 @@ def locateMinMax(minPoint, maxPoint):
     for cube in allCubes.blocks:
         #print (cube.type)
         # 5 is the air block, 10 is bedrock
-        # exclude air, bedrock and dirt
-        if cube.type != 5 and cube.type != 10 and cube.type != 93 and cube.type != 60:
-        #if cube.type != 5 and cube.type != 93:
-        
+        # exclude air, bedrock, grass and dirt
+        for type in excludingType:
+            if cube.type == type:
+                
+                isBanned = True
+                continue
+
+        if not isBanned:    
+            
+            
             minX = min(cube.position.x, minX)
             minY = min(cube.position.y, minY)
             minZ = min(cube.position.z, minZ)
@@ -98,12 +83,92 @@ def locateMinMax(minPoint, maxPoint):
             maxX = max(cube.position.x, maxX)
             maxY = max(cube.position.y, maxY)
             maxZ = max(cube.position.z, maxZ)
+
+        else:
+            isBanned = False
+
+        """
+        if cube.type != 5 and cube.type != 10 and cube.type != 93 and cube.type != 60:
+        #if cube.type != 5 and cube.type != 93:
+
+            print("find the starting block")
+            print("type is: ", cube.type)
+            print("position is: ", cube.position)
+            minX = min(cube.position.x, minX)
+            minY = min(cube.position.y, minY)
+            minZ = min(cube.position.z, minZ)
+
+            maxX = max(cube.position.x, maxX)
+            maxY = max(cube.position.y, maxY)
+            maxZ = max(cube.position.z, maxZ)
+
+        """
         
-
-
     outputTuple = (Point(x = minX, y = minY, z = minZ), 
                     Point(x = maxX, y = maxY, z = maxZ))
     return outputTuple
+
+#giving accurate location of house, this will find all existing materials
+#input: min boundary and max boundary
+#output: a list of all existing tile within
+def getExistingType(accurateMin, accurateMax):
+    print("finding all block types of house")
+    allCubes = client.readCube(Cube(min=accurateMin,max=accurateMax))
+    output = []
+    for cube in allCubes.blocks:
+        if cube.type not in output:
+            output.append(cube.type)
+    return output
+
+# ONLY use this function when accurate location of the house has been found
+# input: accurate min coord and max coord and A LIST of block type 
+# integer the house is made of, all other materials will be swapped with a random existing
+
+def nbtProcessing(minCoord, maxCoord, includeBlocks = [5, 93]):
+
+    allCubes = client.readCube(Cube(min=minCoord,max=maxCoord))
+    passCheck = False
+
+    for cube in allCubes.blocks:
+
+        for include in includeBlocks:
+            if cube.type == include:
+                passCheck = True
+                continue
+        
+        #edit the block if not within one of the block type, it will be swapped with one of the existing block type
+        if not passCheck:
+            #cube.type = includeBlocks[random.randint(0, len(includeBlocks) - 1)]
+            singleBlockChange(cube.position, random.randint(0, len(includeBlocks) - 1))
+
+        #else just reset the boolean and move on to next cube
+        else:
+            passCheck = False
+
+#first will locate the house within the given boundary
+#then it will be repainted at a different location while wipe out the original.
+#input: current house location boundary, target min location (lowest point of the house)
+def moveNBT(currMin, currMax, targetMin):
+    print("nbt is moving")    
+    #read in the current location house data first
+    currentHouse = client.readCube(Cube(
+        min=currMin,
+        max=currMax
+    ))
+    blocksOnX = abs(currMax.x - currMin.x) + 1
+    blocksOnY = abs(currMax.y - currMin.y) + 1
+    blocksOnZ = abs(currMax.z - currMin.z) + 1
+    clearOut(currMin, currMax, AIR)
+
+    blockIndex = 0
+    for i in range(targetMin.x, targetMin.x + blocksOnX):
+        for j in range(targetMin.y, targetMin.y + blocksOnY):
+            for k in range(targetMin.z, targetMin.z + blocksOnZ):
+                singleBlockChange(Point(x=i,y=j,z=k), currentHouse.blocks[blockIndex].type)
+                blockIndex += 1
+                    
+
+
 
 def generateStep(agent, minBound, maxBound):
     #print ("generating step")
@@ -163,53 +228,8 @@ def transformStateActionToCSV(blocks, action, minPoint, maxPoint):
 
     
 
-"""
-#before switching, the range for blocks need to be set.
-#same as fill cube but instead given a chance to fill also fill type is random.
-def destroyerMK1(minPoint, maxPoint):
-    print("destroyer is running")
-    outputList = []
-    for i in range (minPoint.x, maxPoint.x + 1):
-        for j in range (minPoint.y, maxPoint.y + 1):
-            for k in range (minPoint.z, maxPoint.z):
-                #hit the chance and changing the block at this spot.
-                if random.randint(0, 100) < 80:
-                    randomType = random.randint(6, 253)
-                    #read the block at the location and obtaining this current info
-                    currBlock = client.readCube(Cube(
-                    min = Point(x=i, y=j, z=k),
-                    max = Point(x=i, y=j, z=k)))
-                    currType = currBlock.blocks[0].type
-                    location = Point(x=i, y=j, z=k)
-                    #create a tuple contains original type index and position
-                    #With addition data added as the change to block index
-                    #in the order of 1.location, 2.previous block type, 3.current block type
-                    tempTuple = (location, currType, randomType)
-                    outputList.append(tempTuple)
-                    #write over the position using fill
-                    client.fillCube(FillCubeRequest(cube=Cube(
-                        min = Point(x=i, y=j, z=k),
-                        max = Point(x=i, y=j, z=k)
-                    ),
-                    type=randomType))
-
-    return outputList
-    
-
-"""
-
 if __name__ == '__main__':
 
-   
-    
-
-
-    #These are the tile that will be used to do the random swap
-    #Using 3 at top
-    
-
-   
-    
 #x varies 50 - 53, z vaires -20 - 40, y varies 2 - 6
 #load_coord=(50,10,1)
 #the load coordinate function is have x, z, y instead
@@ -217,23 +237,35 @@ if __name__ == '__main__':
     accurateMin = Point(x=50, y=2, z=10)
     accurateMax = Point(x=53, y=6, z=15)
 
-    maxBound = Point(x = 41, y = 3, z = 11)
-    minBound = Point(x = 50, y = 12, z = 20)
+    #print(accurateLoc)
+    excludingType = [5, 93, 10, 60]
+    
+    minMax = locateMinMax(Point(x=40, y=0, z=0), Point(x=60, y=10, z=20), excludingType)
+    print ("minMax is: ", minMax)
+    
+    #minMax = [Point(x = 41, y = 3, z = 11), Point(x = 50, y = 12, z = 20)]
+    
+    currentBlocks = getExistingType(minMax[0], minMax[1])
+    print("included blocks are: ", currentBlocks)
+    
+    #remove the TORCH block from the current blocks
+    if TORCH in currentBlocks:
+        currentBlocks.remove(TORCH)
+
+    #use this processing function to swap out unwant blocks
+    nbtProcessing(minMax[0], minMax[1], currentBlocks)
+
+    """
     accurateLoc = client.readCube(Cube(
         min=accurateMin,
         max=accurateMax
     ))
-    #print(accurateLoc)
-    
-    #minMax = locateMinMax(accurateMin, accurateMax)
-    #print ("minMax is: ", minMax)
-    
-    minMax = [Point(x = 41, y = 3, z = 11), Point(x = 50, y = 12, z = 20)]
+    print(accurateLoc)
+    """
 
-  
+    moveNBT(minMax[0], minMax[1], Point(x=55,y=2,z=20))
     
-    
-    
+    """
     agent = PoDAgent(accurateMin, accurateMax)
     
    
@@ -251,37 +283,9 @@ if __name__ == '__main__':
     
 
     print (trainingData)
-
     """
-    #print(len(trainingData[0][0].blocks) + 2)
-    outputRow = np.zeros(len(trainingData[0][0].blocks) + 2)
-    output = []
 
 
-    
-    
-    #print(outputRow[len(trainingData[0][0].blocks) + 1])
-
-    for data in trainingData:
-        for i in range (len(data[0].blocks)):
-            
-            temp = data[0].blocks[i].type
-            outputRow[i] = temp
-        
-        outputRow[len(data[0].blocks) + 1] = (data[1])
-        
-        output.append(outputRow)
-
-        print (output)
-
-    
-    
-    with open("out.csv", "w", newline="") as f:
-        writer = csv.writer(f)
-        writer.writerows(output)
-   
-   
-    """
 
     #print(trainingData)
    
