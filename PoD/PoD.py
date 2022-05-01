@@ -169,7 +169,7 @@ def moveNBT(currMin, currMax, targetMin):
 
 
 
-def generateStep(agent, minBound, maxBound):
+def generateStep(agent):
     #print ("generating step")
     agentAction = agent.takeAction()
     blocks = client.readCube(Cube(
@@ -280,7 +280,7 @@ if __name__ == '__main__':
     
     while not agent.reachEnd:
         #agent.takeAction()
-        step = generateStep(agent, minBound, maxBound)
+        step = generateStep(agent)
         trainingData.append(step, accurateMin, accurateMax)
         transformStateActionToCSV(step[0], step[1])
 
