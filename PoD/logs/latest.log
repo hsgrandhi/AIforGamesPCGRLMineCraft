@@ -6537,3 +6537,75 @@
 [15:53:06] [grpc-nio-worker-ELG-3-20/DEBUG] [io.grpc.netty.shaded.io.grpc.netty.NettyServerHandler]: [id: 0x71e6576e, L:/0:0:0:0:0:0:0:1:5001 - R:/0:0:0:0:0:0:0:1:61806] OUTBOUND HEADERS: streamId=249 headers=GrpcHttp2OutboundHeaders[:status: 200, content-type: application/grpc, grpc-encoding: identity, grpc-accept-encoding: gzip] streamDependency=0 weight=16 exclusive=false padding=0 endStream=false
 [15:53:06] [grpc-nio-worker-ELG-3-20/DEBUG] [io.grpc.netty.shaded.io.grpc.netty.NettyServerHandler]: [id: 0x71e6576e, L:/0:0:0:0:0:0:0:1:5001 - R:/0:0:0:0:0:0:0:1:61806] OUTBOUND DATA: streamId=249 padding=0 endStream=false length=5 bytes=0000000000
 [15:53:06] [grpc-nio-worker-ELG-3-20/DEBUG] [io.grpc.netty.shaded.io.grpc.netty.NettyServerHandler]: [id: 0x71e6576e, L:/0:0:0:0:0:0:0:1:5001 - R:/0:0:0:0:0:0:0:1:61806] OUTBOUND HEADERS: streamId=249 headers=GrpcHttp2OutboundHeaders[grpc-status: 0] streamDependency=0 weight=16 exclusive=false padding=0 endStream=true
+[16:06:55] [Server thread/INFO]: CosmoX22 lost connection: Internal Exception: java.io.IOException: Connection reset by peer
+[16:06:55] [Server thread/INFO]: CosmoX22 left the game
+[16:06:57] [Server Shutdown Thread/INFO]: Stopping server
+[16:06:57] [Server Shutdown Thread/INFO]: Saving players
+[16:06:57] [Server Shutdown Thread/INFO]: Saving worlds
+[16:06:57] [Server console handler/ERROR] [STDERR]: Exception in thread "Server console handler" java.io.IOError: java.io.IOException: Input/output error
+[16:06:57] [Server console handler/ERROR] [STDERR]: 	at org.jline.keymap.BindingReader.readCharacter(BindingReader.java:143)
+[16:06:57] [Server console handler/ERROR] [STDERR]: 	at org.jline.keymap.BindingReader.readBinding(BindingReader.java:110)
+[16:06:57] [Server console handler/ERROR] [STDERR]: 	at org.jline.keymap.BindingReader.readBinding(BindingReader.java:61)
+[16:06:57] [Server console handler/ERROR] [STDERR]: 	at org.jline.reader.impl.LineReaderImpl.doReadBinding(LineReaderImpl.java:848)
+[16:06:57] [Server console handler/ERROR] [STDERR]: 	at org.jline.reader.impl.LineReaderImpl.readBinding(LineReaderImpl.java:868)
+[16:06:57] [Server console handler/ERROR] [STDERR]: 	at org.jline.reader.impl.LineReaderImpl.readLine(LineReaderImpl.java:575)
+[16:06:57] [Server console handler/ERROR] [STDERR]: 	at org.jline.reader.impl.LineReaderImpl.readLine(LineReaderImpl.java:418)
+[16:06:57] [Server console handler/ERROR] [STDERR]: 	at net.minecrell.terminalconsole.SimpleTerminalConsole.readCommands(SimpleTerminalConsole.java:158)
+[16:06:57] [Server console handler/ERROR] [STDERR]: 	at net.minecrell.terminalconsole.SimpleTerminalConsole.start(SimpleTerminalConsole.java:141)
+[16:06:57] [Server console handler/ERROR] [STDERR]: 	at net.minecraft.server.dedicated.DedicatedServer$2.run(SourceFile:540)
+[16:06:57] [Server console handler/ERROR] [STDERR]: Caused by: java.io.IOException: Input/output error
+[16:06:57] [Server console handler/ERROR] [STDERR]: 	at java.io.FileInputStream.read0(Native Method)
+[16:06:57] [Server console handler/ERROR] [STDERR]: 	at java.io.FileInputStream.read(FileInputStream.java:207)
+[16:06:57] [Server console handler/ERROR] [STDERR]: 	at org.jline.terminal.impl.AbstractPty$PtyInputStream.read(AbstractPty.java:73)
+[16:06:57] [Server console handler/ERROR] [STDERR]: 	at org.jline.utils.NonBlockingInputStream.read(NonBlockingInputStream.java:62)
+[16:06:57] [Server console handler/ERROR] [STDERR]: 	at org.jline.utils.NonBlocking$NonBlockingInputStreamReader.read(NonBlocking.java:168)
+[16:06:57] [Server console handler/ERROR] [STDERR]: 	at org.jline.utils.NonBlockingReader.read(NonBlockingReader.java:57)
+[16:06:57] [Server console handler/ERROR] [STDERR]: 	at org.jline.keymap.BindingReader.readCharacter(BindingReader.java:133)
+[16:06:57] [Server console handler/ERROR] [STDERR]: 	... 9 more
+[16:06:57] [Server Shutdown Thread/ERROR] [Sponge]: /**************************************************************************************************/
+[16:06:57] [Server Shutdown Thread/ERROR] [Sponge]: /*                               Illegal Async PhaseTracker Access                                */
+[16:06:57] [Server Shutdown Thread/ERROR] [Sponge]: /**************************************************************************************************/
+[16:06:57] [Server Shutdown Thread/ERROR] [Sponge]: /* Sponge adapts the vanilla handling of                                                          */
+[16:06:57] [Server Shutdown Thread/ERROR] [Sponge]: /* various processes, such as setting a                                                           */
+[16:06:57] [Server Shutdown Thread/ERROR] [Sponge]: /* block or spawning an entity. Sponge is                                                         */
+[16:06:57] [Server Shutdown Thread/ERROR] [Sponge]: /* designed around the concept that                                                               */
+[16:06:57] [Server Shutdown Thread/ERROR] [Sponge]: /* Minecraft is primarily performing these                                                        */
+[16:06:57] [Server Shutdown Thread/ERROR] [Sponge]: /* operations on the "server thread".                                                             */
+[16:06:57] [Server Shutdown Thread/ERROR] [Sponge]: /* Because of this Sponge is safeguarding                                                         */
+[16:06:57] [Server Shutdown Thread/ERROR] [Sponge]: /* common access to the PhaseTracker as the                                                       */
+[16:06:57] [Server Shutdown Thread/ERROR] [Sponge]: /* entrypoint for performing these sort of                                                        */
+[16:06:57] [Server Shutdown Thread/ERROR] [Sponge]: /* changes.                                                                                       */
+[16:06:57] [Server Shutdown Thread/ERROR] [Sponge]: /*                                                                                                */
+[16:06:57] [Server Shutdown Thread/ERROR] [Sponge]: /*     java.lang.Exception: Async Block                                                           */
+[16:06:57] [Server Shutdown Thread/ERROR] [Sponge]: /*     Change Detected                                                                            */
+[16:06:57] [Server Shutdown Thread/ERROR] [Sponge]: /*     org.spongepowered.common.event.tracking.PhaseTracker.switchToPhase(PhaseTracker.java:244)  */
+[16:06:57] [Server Shutdown Thread/ERROR] [Sponge]: /*     org.spongepowered.common.event.tracking.PhaseContext.buildAndSwitch(PhaseContext.java:260) */
+[16:06:57] [Server Shutdown Thread/ERROR] [Sponge]: /*     org.spongepowered.common.world.WorldManager.unloadWorld(WorldManager.java:541)             */
+[16:06:57] [Server Shutdown Thread/ERROR] [Sponge]: /*     net.minecraft.server.MinecraftServer.func_71260_j(SourceFile:3048)                         */
+[16:06:57] [Server Shutdown Thread/ERROR] [Sponge]: /*     net.minecraft.server.MinecraftServer.accessor$stopServer(SourceFile)                       */
+[16:06:57] [Server Shutdown Thread/ERROR] [Sponge]: /*     java.lang.Thread.run(Thread.java:750)                                                      */
+[16:06:57] [Server Shutdown Thread/ERROR] [Sponge]: /**************************************************************************************************/
+[16:06:57] [Server Shutdown Thread/INFO] [Sponge]: Unloading world [world] (minecraft:overworld/0)
+[16:06:57] [Server Shutdown Thread/ERROR] [Sponge]: /*************************************************************************************************/
+[16:06:57] [Server Shutdown Thread/ERROR] [Sponge]: /*                               Illegal Async PhaseTracker Access                               */
+[16:06:57] [Server Shutdown Thread/ERROR] [Sponge]: /*************************************************************************************************/
+[16:06:57] [Server Shutdown Thread/ERROR] [Sponge]: /* Sponge adapts the vanilla handling of                                                         */
+[16:06:57] [Server Shutdown Thread/ERROR] [Sponge]: /* various processes, such as setting a                                                          */
+[16:06:57] [Server Shutdown Thread/ERROR] [Sponge]: /* block or spawning an entity. Sponge is                                                        */
+[16:06:57] [Server Shutdown Thread/ERROR] [Sponge]: /* designed around the concept that                                                              */
+[16:06:57] [Server Shutdown Thread/ERROR] [Sponge]: /* Minecraft is primarily performing these                                                       */
+[16:06:57] [Server Shutdown Thread/ERROR] [Sponge]: /* operations on the "server thread".                                                            */
+[16:06:57] [Server Shutdown Thread/ERROR] [Sponge]: /* Because of this Sponge is safeguarding                                                        */
+[16:06:57] [Server Shutdown Thread/ERROR] [Sponge]: /* common access to the PhaseTracker as the                                                      */
+[16:06:57] [Server Shutdown Thread/ERROR] [Sponge]: /* entrypoint for performing these sort of                                                       */
+[16:06:57] [Server Shutdown Thread/ERROR] [Sponge]: /* changes.                                                                                      */
+[16:06:57] [Server Shutdown Thread/ERROR] [Sponge]: /*                                                                                               */
+[16:06:57] [Server Shutdown Thread/ERROR] [Sponge]: /*     java.lang.Exception: Async Block                                                          */
+[16:06:57] [Server Shutdown Thread/ERROR] [Sponge]: /*     Change Detected                                                                           */
+[16:06:57] [Server Shutdown Thread/ERROR] [Sponge]: /*     org.spongepowered.common.event.tracking.PhaseTracker.completePhase(PhaseTracker.java:274) */
+[16:06:57] [Server Shutdown Thread/ERROR] [Sponge]: /*     org.spongepowered.common.event.tracking.PhaseContext.close(PhaseContext.java:618)         */
+[16:06:57] [Server Shutdown Thread/ERROR] [Sponge]: /*     org.spongepowered.common.world.WorldManager.unloadWorld(WorldManager.java:580)            */
+[16:06:57] [Server Shutdown Thread/ERROR] [Sponge]: /*     net.minecraft.server.MinecraftServer.func_71260_j(SourceFile:3048)                        */
+[16:06:57] [Server Shutdown Thread/ERROR] [Sponge]: /*     net.minecraft.server.MinecraftServer.accessor$stopServer(SourceFile)                      */
+[16:06:57] [Server Shutdown Thread/ERROR] [Sponge]: /*     java.lang.Thread.run(Thread.java:750)                                                     */
+[16:06:57] [Server Shutdown Thread/ERROR] [Sponge]: /*************************************************************************************************/

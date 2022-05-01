@@ -123,7 +123,6 @@ def getExistingType(accurateMin, accurateMax):
 # ONLY use this function when accurate location of the house has been found
 # input: accurate min coord and max coord and A LIST of block type 
 # integer the house is made of, all other materials will be swapped with a random existing
-
 def nbtProcessing(minCoord, maxCoord, includeBlocks = [5, 93]):
 
     allCubes = client.readCube(Cube(min=minCoord,max=maxCoord))
@@ -255,6 +254,9 @@ if __name__ == '__main__':
     #use this processing function to swap out unwant blocks
     nbtProcessing(minMax[0], minMax[1], currentBlocks)
 
+    sizeX = minMax[1].x - minMax[0].x + 1
+    sizeY = minMax[1].y - minMax[0].y + 1
+    sizeZ = minMax[1].z - minMax[0].z + 1
     """
     accurateLoc = client.readCube(Cube(
         min=accurateMin,
@@ -263,10 +265,12 @@ if __name__ == '__main__':
     print(accurateLoc)
     """
 
-    moveNBT(minMax[0], minMax[1], Point(x=55,y=2,z=20))
+    moveToCoord = Point(x=55,y=2,z=20)
+    moveNBT(minMax[0], minMax[1], moveToCoord)
     
-    """
-    agent = PoDAgent(accurateMin, accurateMax)
+    newMinMax = locateMinMax(moveToCoord, Point(x=moveToCoord.x + sizeX + 2, y=moveToCoord.y + sizeY + 2, z=moveToCoord.z + sizeZ + 2))
+    
+    agent = PoDAgent(newMinMax[0], newMinMax[1])
     
    
     
@@ -283,7 +287,7 @@ if __name__ == '__main__':
     
 
     print (trainingData)
-    """
+    
 
 
 
