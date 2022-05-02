@@ -27,7 +27,8 @@ class PoDAgent:
         23 = "BRICK_BLOCK"
         217 = "STONE"
         """
-        self.selectedTiles = [45, 23, 217]
+        # self.selectedTiles = [45, 23, 217]
+        self.selectedTiles = [5, 41, 131, 160, 88, 224, 247, 60]
         self.reachEnd = False
 
     # position argument needs a Point type instance, selectedType can be int or string

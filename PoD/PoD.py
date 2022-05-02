@@ -138,7 +138,9 @@ def nbtProcessing(minCoord, maxCoord, includeBlocks = [5, 93]):
         #edit the block if not within one of the block type, it will be swapped with one of the existing block type
         if not passCheck:
             #cube.type = includeBlocks[random.randint(0, len(includeBlocks) - 1)]
-            singleBlockChange(cube.position, random.randint(0, len(includeBlocks) - 1))
+            # randomAllowedCube = random.randint(0, len(includeBlocks) - 1)
+            # singleBlockChange(cube.position, includeBlocks[randomAllowedCube])
+            singleBlockChange(cube.position, 160)
 
         #else just reset the boolean and move on to next cube
         else:
@@ -166,9 +168,7 @@ def moveNBT(currMin, currMax, targetMin):
                 singleBlockChange(Point(x=i,y=j,z=k), currentHouse.blocks[blockIndex].type)
                 blockIndex += 1
                     
-
-
-
+# make the agent take a step
 def generateStep(agent):
     #print ("generating step")
     agentAction = agent.takeAction()
@@ -179,51 +179,53 @@ def generateStep(agent):
     output = (blocks, agentAction)
     return output
 
-def transformStateActionToCSV(blocks, action, minPoint, maxPoint):
-    # connect to the server
-    # channel = grpc.insecure_channel('localhost:5001')
-    # client = minecraft_pb2_grpc.MinecraftServiceStub(channel)
-
-    # get the boundries positions of the building
+# transform current building state to array and push to csv
+def transformStateActionToCSV(blocks, action, minPoint, acceptedBlocks, dictForOneHotMapping):
     
-    # min is 40 2 10, max is 50 12 20
-    # spawn center is 45, 7, 15
-    print(minMax, "minMax")
-
-    # read all the blocks in the range
-    # blocks = client.readCube(Cube(
-    #     min=Point(x=minMax[0].x, y=minMax[0].y, z=minMax[0].z),
-    #     max=Point(x=minMax[1].x, y=minMax[1].y, z=minMax[1].z)
-    # ))
+    # generate the one hot vectors for each block type
+    numberOfBlocks = len(acceptedBlocks)
+    oneHotValues = {}
+    for block in acceptedBlocks:
+        tempOneHot = [0]*(numberOfBlocks)
+        oneHotPosition = dictForOneHotMapping[block]
+        tempOneHot[oneHotPosition] = 1
+        oneHotValues[block] = tempOneHot
+    print(oneHotValues, "One hot encoded vectors")
 
     # create a 3D array with the max required dimensions, added + 1 to handle index errors
-    threedArr = np.full((20,20,20), 5)
+    threedArr = np.full((6,6,6, numberOfBlocks), [1,0,0,0,0,0,0,0])
     print(threedArr.shape)
     for block in blocks.blocks:
         print("block is: ", block.type)
-        #print("index is: ", block.position.x-41, block.position.y-3, block.position.z-11)
-        threedArr[block.position.x-minPoint.x][block.position.y-minPoint.y][block.position.z-minPoint.z] = block.type
+        threedArr[block.position.x-minPoint.x][block.position.y-minPoint.y][block.position.z-minPoint.z] = oneHotValues[block.type]
     print(threedArr)
     
-
     # flatten the array
     flattenedArray = np.stack(threedArr, axis=1).flatten()
 
-    # add shape data to the flattened array
-    # flattenedArray.append(threedArr.shape)
-    # flattenedArray = np.append(flattenedArray, threedArr.shape)
-
+    # add the action to the flattened array and then push to csv
     flattenedArray = np.append(flattenedArray, action)
     print(flattenedArray, flattenedArray.shape)
-    with open("buildingData.csv", "a") as f:
+    with open("buildingData.csv", "a", newline='') as f:
         writer = csv.writer(f)
         writer.writerow(flattenedArray)
 
-    # convert array into dataframe
-    DF = pd.DataFrame(flattenedArray)
-    
-    # save the dataframe as a csv file
-    DF.to_csv("data1.csv", index=False)
+############################### Generate other csv without encoding to understand better########################
+
+    threedArr2 = np.full((6,6,6), 5)
+    print(threedArr2.shape)
+    for block in blocks.blocks:
+        #print("index is: ", block.position.x-41, block.position.y-3, block.position.z-11)
+        # threedArr[block.position.x-minPoint.x][block.position.y-minPoint.y][block.position.z-minPoint.z] = block.type
+        threedArr2[block.position.x-minPoint.x][block.position.y-minPoint.y][block.position.z-minPoint.z] = block.type
+    print(threedArr)
+    # flatten the array
+    flattenedArray2 = np.stack(threedArr2, axis=1).flatten()
+    flattenedArray2 = np.append(flattenedArray2, action)
+    print(flattenedArray2, flattenedArray2.shape)
+    with open("buildingData2.csv", "a", newline='') as f2:
+        writer = csv.writer(f2)
+        writer.writerow(flattenedArray2)
 
     
 
@@ -238,21 +240,30 @@ if __name__ == '__main__':
 
     #print(accurateLoc)
     excludingType = [5, 93, 10, 60]
+
+    # block types that we will allow
+    acceptedBlocks = [5, 41, 60, 88, 131, 160, 224, 247]
+
+    # dictionary for one-hot mapping
+    dict_one_hot_mapping = {5: 0, 41: 1, 60: 2, 88: 3, 131: 4, 160: 5, 224: 6, 247: 7}
     
     minMax = locateMinMax(Point(x=40, y=0, z=0), Point(x=60, y=10, z=20), excludingType)
     print ("minMax is: ", minMax)
     
     #minMax = [Point(x = 41, y = 3, z = 11), Point(x = 50, y = 12, z = 20)]
     
-    currentBlocks = getExistingType(minMax[0], minMax[1])
-    print("included blocks are: ", currentBlocks)
+    # currentBlocks = getExistingType(minMax[0], minMax[1])
+    # print("included blocks are: ", currentBlocks)
     
-    #remove the TORCH block from the current blocks
-    if TORCH in currentBlocks:
-        currentBlocks.remove(TORCH)
+    # #remove the TORCH block from the current blocks
+    # if TORCH in currentBlocks:
+    #     currentBlocks.remove(TORCH)
+
+  
 
     #use this processing function to swap out unwant blocks
-    nbtProcessing(minMax[0], minMax[1], currentBlocks)
+    # nbtProcessing(minMax[0], minMax[1], currentBlocks)
+    nbtProcessing(minMax[0], minMax[1], acceptedBlocks)
 
     sizeX = minMax[1].x - minMax[0].x + 1
     sizeY = minMax[1].y - minMax[0].y + 1
@@ -265,28 +276,30 @@ if __name__ == '__main__':
     print(accurateLoc)
     """
 
-    moveToCoord = Point(x=55,y=2,z=20)
+    # y=4 is the min, if lower, it will destroy the ground layer
+    moveToCoord = Point(x=0,y=4,z=0)
     moveNBT(minMax[0], minMax[1], moveToCoord)
     
     newMinMax = locateMinMax(moveToCoord, Point(x=moveToCoord.x + sizeX + 2, y=moveToCoord.y + sizeY + 2, z=moveToCoord.z + sizeZ + 2))
+    print(newMinMax)
     
     agent = PoDAgent(newMinMax[0], newMinMax[1])
     
    
     
-    trainingData = []
+    # trainingData = []
 
     #debug
     
     while not agent.reachEnd:
         #agent.takeAction()
         step = generateStep(agent)
-        trainingData.append(step, accurateMin, accurateMax)
-        transformStateActionToCSV(step[0], step[1])
+        # trainingData.append(step, accurateMin, accurateMax)
+        transformStateActionToCSV(step[0], step[1], newMinMax[0], acceptedBlocks, dict_one_hot_mapping)
 
     
 
-    print (trainingData)
+    # print (trainingData)
     
 
 
