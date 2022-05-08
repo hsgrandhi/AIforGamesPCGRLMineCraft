@@ -180,7 +180,7 @@ def generateStep(agent):
     return output
 
 # transform current building state to array and push to csv
-def transformStateActionToCSV(blocks, action, minPoint, acceptedBlocks, dictForOneHotMapping):
+def transformStateActionToCSV(blocks, action, minPoint, acceptedBlocks, dictForOneHotMapping, fileName = "buildingData0.csv"):
     
     # generate the one hot vectors for each block type
     numberOfBlocks = len(acceptedBlocks)
@@ -206,12 +206,12 @@ def transformStateActionToCSV(blocks, action, minPoint, acceptedBlocks, dictForO
     # add the action to the flattened array and then push to csv
     flattenedArray = np.append(flattenedArray, action)
     print(flattenedArray, flattenedArray.shape)
-    with open("buildingData.csv", "a", newline='') as f:
+    with open(fileName, "a", newline='') as f:
         writer = csv.writer(f)
         writer.writerow(flattenedArray)
 
 ############################### Generate other csv without encoding to understand better########################
-
+    secondFileName = "Origin" + fileName
     threedArr2 = np.full((6,6,6), 5)
     print(threedArr2.shape)
     for block in blocks.blocks:
@@ -223,10 +223,24 @@ def transformStateActionToCSV(blocks, action, minPoint, acceptedBlocks, dictForO
     flattenedArray2 = np.stack(threedArr2, axis=1).flatten()
     flattenedArray2 = np.append(flattenedArray2, action)
     print(flattenedArray2, flattenedArray2.shape)
-    with open("buildingData2.csv", "a", newline='') as f2:
+    with open(secondFileName, "a", newline='') as f2:
         writer = csv.writer(f2)
         writer.writerow(flattenedArray2)
+   
+def genEpisodes(houseData, min, max, iter = 1):
+    for i in range(iter):
+        print("begin iteration ", i)
+        agent = PoDAgent(newMinMax[0], newMinMax[1])
+        while not agent.reachEnd:
+            #agent.takeAction()
+            step = generateStep(agent)
+            # trainingData.append(step, accurateMin, accurateMax)
+            fileName = "buildingData" + str(i) + ".csv"
+            transformStateActionToCSV(step[0], step[1], newMinMax[0], acceptedBlocks, dict_one_hot_mapping, fileName)
 
+        #Once is traversed, destroy the current building and spawn the original back using the houseData
+        clearOut(min, max, AIR)
+        client.spawnBlocks(houseData)
     
 
 if __name__ == '__main__':
@@ -268,21 +282,47 @@ if __name__ == '__main__':
     sizeX = minMax[1].x - minMax[0].x + 1
     sizeY = minMax[1].y - minMax[0].y + 1
     sizeZ = minMax[1].z - minMax[0].z + 1
+    
     """
     accurateLoc = client.readCube(Cube(
         min=accurateMin,
         max=accurateMax
     ))
     print(accurateLoc)
+
+    clearOut(accurateMin, accurateMax, AIR)
+
+    client.spawnBlocks(accurateLoc)
     """
 
-    # y=4 is the min, if lower, it will destroy the ground layer
+    #Move the building to a new location and update the new min max location
+    # y=4 is the min, if lower, it will destroy the ground layer, while x, z are the origin
     moveToCoord = Point(x=0,y=4,z=0)
+    
     moveNBT(minMax[0], minMax[1], moveToCoord)
     
     newMinMax = locateMinMax(moveToCoord, Point(x=moveToCoord.x + sizeX + 2, y=moveToCoord.y + sizeY + 2, z=moveToCoord.z + sizeZ + 2))
     print(newMinMax)
     
+    #Record the current building data to be later spawned so multiple episode can be generated
+    
+    
+    currBuilding = client.readCube(Cube(
+        min=newMinMax[0],
+        max=newMinMax[1]
+    ))
+
+    genEpisodes(currBuilding, newMinMax[0], newMinMax[1], 3)
+
+    #client.spawnBlocks(currBuilding)
+
+    
+
+
+
+
+
+    """
     agent = PoDAgent(newMinMax[0], newMinMax[1])
     
    
@@ -292,11 +332,10 @@ if __name__ == '__main__':
     #debug
     
     while not agent.reachEnd:
-        #agent.takeAction()
         step = generateStep(agent)
         # trainingData.append(step, accurateMin, accurateMax)
         transformStateActionToCSV(step[0], step[1], newMinMax[0], acceptedBlocks, dict_one_hot_mapping)
-
+    """
     
 
     # print (trainingData)
