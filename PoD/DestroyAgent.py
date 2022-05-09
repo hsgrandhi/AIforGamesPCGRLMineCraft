@@ -48,11 +48,8 @@ class PoDAgent:
         #print ("action is taken")
         coinToss = random.randint(0, 100)
         
-        #currentX = self.minBoundary.x
-        #currentY = self.minBoundary.y
-        #currentZ = self.minBoundary.z
-        #print("original location is: ", self.currPosition)
-
+        
+        #action, which is the original tile type before change been made is recorded here
         action = self.getBlockType(self.currPosition)
         #proceed to take next step of destruction
         #Destruction traverse order is: z -> y -> x
@@ -76,7 +73,7 @@ class PoDAgent:
         else:
             print("boundary reached")
             self.reachEnd = True
-            return -1
+            return action
 
         #print("new location is: ", self.currPosition)
 
