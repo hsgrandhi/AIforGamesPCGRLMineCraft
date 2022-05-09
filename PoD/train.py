@@ -10,12 +10,22 @@ HOUSE_WIDTH = 6
 HOUSE_HEIGHT = 6
 HOUSE_DEPTH = 6
 TARGET_COL = 216
-ACTION_SPACE = 8
+ACTION_SPACE = 9
 DATA_FILE = "buildingData2.csv"
 MODEL_PATH = "models"
 
+##### Ye to change -1 to same block value -> change 9 to 8 ####
 
-value_map = {5: 0, 41: 1, 224: 2, 60: 3, 160: 4, 131: 5, 88: 6}
+# value_map = {5: 0, 41: 1, 224: 2, 60: 3, 160: 4, 131: 5, 88: 6}
+value_map = {5: 0, 41: 1, 60: 2, 88: 3, 131: 4, 160: 5, 224: 6, 247: 7}
+
+# for file in os.listdir(pod_root_path):
+#     print(f"compiling df {file}")
+#     df = pd.read_csv(f"{pod_root_path}/{file}")
+#     dfs.append(df)
+
+# df = pd.concat(dfs)
+
 df = pd.read_csv(DATA_FILE, header=None)
 print(f"df shape {len(df)} rows {len(df.iloc[0])} cols")
 print(f"df: \n{df.head()}\n\n")
@@ -29,8 +39,8 @@ y = y.astype('int32')
 for row_idx in range(len(df)):
     cols = df.iloc[row_idx].values
     for col_idx in range(len(cols)):
-        df.iloc[row_idx,col_idx] = value_map.get(cols[col_idx], 7)
-    y[row_idx] = value_map.get(y[row_idx], 7)
+        df.iloc[row_idx,col_idx] = value_map.get(cols[col_idx], 8)
+    y[row_idx] = value_map.get(y[row_idx], 8)
 
 X = []
 # Convert df to onehot
@@ -38,13 +48,13 @@ for row_idx in range(len(df)):
     cols = df.iloc[row_idx].values
     new_row = []
     for col_idx in range(len(cols)):
-        new_onehot = [0]*8
+        new_onehot = [0]*9
         new_onehot[df.iloc[row_idx, col_idx]] = 1
         new_row.append(new_onehot)
     new_row = np.array(new_row).reshape(HOUSE_HEIGHT,HOUSE_WIDTH,HOUSE_DEPTH,ACTION_SPACE)
     X.append(new_row)
 
-    y[row_idx] = value_map.get(y[row_idx], 7)
+    y[row_idx] = value_map.get(y[row_idx], 9)
 
 # convert y to onehot
 y = np_utils.to_categorical(y)
@@ -58,7 +68,7 @@ model = tf.keras.models.Sequential([
         tf.keras.layers.Conv3D(128, 3, activation='relu', padding="SAME"),
         tf.keras.layers.Conv3D(256, 3, activation='relu', padding="SAME"),
         tf.keras.layers.Flatten(),
-        tf.keras.layers.Dense(8, activation='softmax')
+        tf.keras.layers.Dense(9, activation='softmax')
     ])
 
 model.summary()
