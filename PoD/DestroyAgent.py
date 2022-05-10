@@ -55,7 +55,7 @@ class PoDAgent:
         #Destruction traverse order is: z -> y -> x
         if coinToss <= self.coinFlip:
             #block will be changed to one of the type in tile Selection
-            randomTile = random.randint(0, 2)
+            randomTile = random.randint(0, 7)
             tileChangeTo = self.selectedTiles[randomTile]
             self.singleBlockChange(self.currPosition, tileChangeTo)
         #after change or not move on to next target

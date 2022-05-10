@@ -55,13 +55,7 @@ client.spawnBlocks(Blocks(blocks=[  # Spawn a flying machine
     
     
 ]))
-
-
-
-
-
-    
-      
+   
 #blocks = client.readCube(Cube(
 #    min=Point(x=1, y=5, z=-4),
 #    max=Point(x=1, y=6, z=1)
@@ -75,12 +69,8 @@ blocks = client.readCube(Cube(
 singleBlock = client.readCube(Cube(Point(x=1, y=5, z=-4)))
 
 print(singleBlock)
-
-
 #blocks[2].type = AIR
-
 print(blocks)
-
 
 #read func test (flying machine loc)
 minPoint = Point(x=1, y=5, z=-4)
