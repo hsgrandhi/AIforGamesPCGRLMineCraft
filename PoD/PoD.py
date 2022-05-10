@@ -268,7 +268,7 @@ def renderState(state, currMin, size):
 
 
     for block in currentHouse.blocks:
-        print(block.position)
+        #print(block.position)
         block.type = int(state[blockIndex])
         blockIndex += 1
   
@@ -364,7 +364,7 @@ if __name__ == '__main__':
     houseState = readResult.values.tolist()
     #remove the last one since it's action
     houseState.pop()
-    print("read result 2d print: ", houseState[0][1])
+    print("state change is: ", houseState[0])
     
     renderState(houseState[0], Point(x=0, y=4, z=0), Point(x=6, y=6, z=6))
 

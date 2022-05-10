@@ -22,11 +22,7 @@ class PoDAgent:
         #start from minboundary to move the agent
         self.currPosition = deepcopy(self.minBoundary) 
         
-        """
-        45 = "CONCRETE"
-        23 = "BRICK_BLOCK"
-        217 = "STONE"
-        """
+      
         # self.selectedTiles = [45, 23, 217]
         self.selectedTiles = [5, 41, 131, 160, 88, 224, 247, 60]
         self.reachEnd = False
@@ -167,4 +163,75 @@ class PoDAgent:
 
         else:
             return
+
+
+
+class buildAgent:
+    def __init__(self, minBound = Point(x=0,y=0,z=0), maxBound = Point(x=0,y=0,z=0)):
+        
+        #mute the block or not
+        
+        
+
+        self.minBoundary = minBound
+        self.maxBoundary = maxBound
+
+        #start from minboundary to move the agent
+        self.currPosition = deepcopy(self.maxBoundary) 
+        
+        
+      
+        self.reachEnd = False
+
+    # position argument needs a Point type instance, selectedType can be int or string
+    def singleBlockChange (self, position, selectedType):
+        #print("position to change is: ", position)
+        client.fillCube(FillCubeRequest(cube=Cube(
+                        min = position,
+                        max = position
+                    ), type=selectedType))
+
+    def getBlockType (self, position):
+        blocks = client.readCube(Cube(min=position, max=position))
+
+        return blocks.blocks[0].type
+    
+    def repair(self, action):
+        #print ("action is taken")
+     
+        
+        
+        #action, which is the original tile type before change been made is recorded here
+        
+        #proceed to take next step of destruction
+        #Destruction traverse order is: z -> y -> x
+       #TODO: boundary is off by 1 for everything
+        
+        tileChangeTo = action
+        self.singleBlockChange(self.currPosition, tileChangeTo)
+        #after change or not move on to next target
+        if self.currPosition.z - 1 > self.minBoundary.z - 1:
+            self.currPosition.z -= 1
+        elif self.currPosition.y - 1 > self.minBoundary.y - 1:
+            
+            self.currPosition.z = self.maxBoundary.z
+            self.currPosition.y -= 1
+        elif self.currPosition.x - 1 > self.minBoundary.x - 1:
+            
+            self.currPosition.z = self.maxBoundary.z
+            self.currPosition.y = self.maxBoundary.y
+            self.currPosition.x -= 1
+        #meet maxBoundary
+        else:
+            print("boundary reached")
+            self.reachEnd = True
+            return action
+
+        #print("new location is: ", self.currPosition)
+
+         
+
+        return action
+    #take a random action then return the reversed action for record
+    
 
