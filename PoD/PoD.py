@@ -12,11 +12,15 @@ from DestroyAgent import PoDAgent
 
 import csv
 import pandas as pd
+from pandas import *
 
 channel = grpc.insecure_channel('localhost:5001')
 client = minecraft_pb2_grpc.MinecraftServiceStub(channel)
 
-#TODO: fix min max, 
+#TODO: Make a more efficient destroy agent for quicker data generation
+#TODO: Check and make sure the csv file works and reversble
+#TODO: Work out a paddle 12 12 12 method
+#TODO: Make a construction agent.
 """
 *********** NOTICE **********
 So as for the read in result, it traverse in this order for all Blocks.blocks[0] to [size]
@@ -87,22 +91,6 @@ def locateMinMax(minPoint, maxPoint, excludingType=[5, 93]):
         else:
             isBanned = False
 
-        """
-        if cube.type != 5 and cube.type != 10 and cube.type != 93 and cube.type != 60:
-        #if cube.type != 5 and cube.type != 93:
-
-            print("find the starting block")
-            print("type is: ", cube.type)
-            print("position is: ", cube.position)
-            minX = min(cube.position.x, minX)
-            minY = min(cube.position.y, minY)
-            minZ = min(cube.position.z, minZ)
-
-            maxX = max(cube.position.x, maxX)
-            maxY = max(cube.position.y, maxY)
-            maxZ = max(cube.position.z, maxZ)
-
-        """
         
     outputTuple = (Point(x = minX, y = minY, z = minZ), 
                     Point(x = maxX, y = maxY, z = maxZ))
@@ -234,18 +222,75 @@ def transformStateActionToCSV(blocks, action, minPoint, acceptedBlocks, dictForO
 def genEpisodes(houseData, min, max, iter = 1, fileName = "buildingData.csv"):
     for i in range(iter):
         print("begin iteration ", i)
-        agent = PoDAgent(newMinMax[0], newMinMax[1])
+        agent = PoDAgent(min, max)
         while not agent.reachEnd:
             #agent.takeAction()
             step = generateStep(agent)
             # trainingData.append(step, accurateMin, accurateMax)
             
-            transformStateActionToCSV(step[0], step[1], newMinMax[0], acceptedBlocks, dict_one_hot_mapping, fileName)
+            transformStateActionToCSV(step[0], step[1], min, acceptedBlocks, dict_one_hot_mapping, fileName)
 
         #Once is traversed, destroy the current building and spawn the original back using the houseData
         clearOut(min, max, AIR)
         client.spawnBlocks(houseData)
     
+
+def readInCSV(fileName):
+    print("csv is read")
+    output = []
+    with open(fileName, newline='') as csvfile:
+        spamreader = csv.reader(csvfile, delimiter=' ', quotechar='|')
+
+        for row in spamreader:
+            #print(', '.join(row))
+            output.append(row)
+    return output
+
+
+def reverseDestruction(data):
+    print("reversing destruction")
+
+# input: a single line of string contains the whole world state, currMin is where the min the house will be spawned
+# size is a Point type that contains the house size on three dimensions
+# output: none, will render the state into the world
+def renderState(state, currMin, size):
+    print("render given state")
+   
+    currMax = Point(x=0,y=0,z=0)
+    currMax.x = currMin.x + size.x - 1
+    currMax.y = currMin.y + size.y - 1
+    currMax.z = currMin.z + size.z - 1
+    clearOut(currMin, Point(x=currMin.x+size.x + 1, y=currMin.y+size.y + 1, z=currMin.z+size.z + 1), AIR)
+    #generate an air block that is the same size as the house, count it as initilize
+    currentHouse = client.readCube(Cube(min=currMin, max=currMax))
+
+    blockIndex = 0
+
+    """
+    for block in currentHouse.blocks:
+        print(block.position)
+        block.type = int(state[blockIndex])
+        blockIndex += 1
+    """
+        #try orientation x, z, y
+    """
+    for i in range(size.x):
+        for j in range(size.y):
+            for k in range(size.z):
+                currentHouse.blocks[blockIndex].type = int(state[blockIndex])
+                #singleBlockChange(Point(x=i,y=j,z=k), currentHouse.blocks[blockIndex].type)
+                blockIndex += 1
+    """
+    #doing so to get the correct orientation, since the orientation is wrong in csv file, instead of z, y, x, it goes x, y, z
+    for i in range(currMin.y, currMin.y + size.y):
+        for j in range(currMin.x, currMin.x + size.x):
+            for k in range(currMin.z, currMin.z + size.z):
+                singleBlockChange(Point(x=k,y=i,z=j), currentHouse.blocks[blockIndex].type)
+                blockIndex += 1
+    #client.spawnBlocks(currentHouse)
+    
+
+
 
 if __name__ == '__main__':
 
@@ -268,17 +313,8 @@ if __name__ == '__main__':
     minMax = locateMinMax(Point(x=40, y=0, z=0), Point(x=60, y=10, z=20), excludingType)
     print ("minMax is: ", minMax)
     
-    #minMax = [Point(x = 41, y = 3, z = 11), Point(x = 50, y = 12, z = 20)]
-    
-    # currentBlocks = getExistingType(minMax[0], minMax[1])
-    # print("included blocks are: ", currentBlocks)
-    
-    # #remove the TORCH block from the current blocks
-    # if TORCH in currentBlocks:
-    #     currentBlocks.remove(TORCH)
-
+    ############## Code used to move the building to correct location and preprocess it contained tiles ##########
   
-
     #use this processing function to swap out unwant blocks
     # nbtProcessing(minMax[0], minMax[1], currentBlocks)
     nbtProcessing(minMax[0], minMax[1], acceptedBlocks)
@@ -287,18 +323,6 @@ if __name__ == '__main__':
     sizeY = minMax[1].y - minMax[0].y + 1
     sizeZ = minMax[1].z - minMax[0].z + 1
     
-    """
-    accurateLoc = client.readCube(Cube(
-        min=accurateMin,
-        max=accurateMax
-    ))
-    print(accurateLoc)
-
-    clearOut(accurateMin, accurateMax, AIR)
-
-    client.spawnBlocks(accurateLoc)
-    """
-
     #Move the building to a new location and update the new min max location
     # y=4 is the min, if lower, it will destroy the ground layer, while x, z are the origin
     moveToCoord = Point(x=0,y=4,z=0)
@@ -316,9 +340,10 @@ if __name__ == '__main__':
         min=newMinMax[0],
         max=newMinMax[1]
     ))
+    for block in currBuilding.blocks:
+        print(block)
 
-
-
+  
 
 
 
@@ -333,15 +358,16 @@ if __name__ == '__main__':
 
     #client.spawnBlocks(currBuilding)
 
+
+    """
+    ########### Code use to read in csv and test the csv data's correctness #############
+    #readResult = readInCSV("buildingData0.csv")
+    readResult = read_csv("buildingData0.csv")
+    houseState = readResult.values.tolist()
+    #remove the last one since it's action
+    houseState.pop()
+    print("read result 2d print: ", houseState[0][1])
     
+    renderState(houseState[0], Point(x=0, y=4, z=0), Point(x=6, y=6, z=6))
 
-
-
-
-
-    
-
-
-
-
-
+    """
