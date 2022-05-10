@@ -317,10 +317,18 @@ if __name__ == '__main__':
         max=newMinMax[1]
     ))
 
+
+
+
+
+
+    ############## Code used to generate training data, will take about 2 days to run ##########
+
+    """
     for i in range (20):
         fileName = "buildingData" + str(i) + ".csv"
         genEpisodes(currBuilding, newMinMax[0], newMinMax[1], 230, fileName)
-    
+    """
     
 
     #client.spawnBlocks(currBuilding)
@@ -331,46 +339,9 @@ if __name__ == '__main__':
 
 
 
-    """
-    agent = PoDAgent(newMinMax[0], newMinMax[1])
-    
-   
-    
-    # trainingData = []
-
-    #debug
-    
-    while not agent.reachEnd:
-        step = generateStep(agent)
-        # trainingData.append(step, accurateMin, accurateMax)
-        transformStateActionToCSV(step[0], step[1], newMinMax[0], acceptedBlocks, dict_one_hot_mapping)
-    """
-    
-
-    # print (trainingData)
     
 
 
 
-    #print(trainingData)
-   
-    
-   
-    #example syntax to use the readCube result, Blocks type obj
-    #print (blocks.blocks[0].type)
-
-
-
-    #read func test (flying machine loc)
-    #minPoint = Point(x=1, y=5, z=-4)
-    #maxPoint = Point(x=1, y=6, z=1)
-
-    #output = []
-    #output = destroyer(minPoint, maxPoint)
-    #print(output)
-    #readBlocks = readSingleCubes(minPoint, maxPoint)
-
-    #print("below is single read result")
-    #print(readBlocks[0])   
 
 
