@@ -6,6 +6,9 @@ from keras.utils import np_utils
 import os
 import sys
 
+# check if GPU is available
+print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
+
 # Set variables
 HOUSE_WIDTH = 6
 HOUSE_HEIGHT = 6
@@ -25,6 +28,16 @@ print(f"df: \n{df.head()}\n\n")
 '''
 
 # dict to map cube types to ordinal values
+'''
+5 = AIR
+41 = COBBLESTONE
+60 = DIRT
+88 = GLASS_PANE(window)
+131 = LOG
+160 = PLANKS
+224 = STONE_STAIRS
+247 = WOODEN_DOOR
+'''
 value_map = {5: 0, 41: 1, 60: 2, 88: 3, 131: 4, 160: 5, 224: 6, 247: 7}
 
 # generate column numbers for each column(216 cubes + target)
