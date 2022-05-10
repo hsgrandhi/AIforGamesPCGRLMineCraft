@@ -8,6 +8,7 @@ import tensorflow as tf
 import minecraft_pb2_grpc
 from minecraft_pb2 import *
 from PoD import locateMinMax
+from worldControl import worldReset
 
 # Set variables
 HOUSE_WIDTH = 6
@@ -31,40 +32,32 @@ def generateRandomNoiseBlock(location, size):
                 randomInt = randint(0,7)
                 singleBlockChange(Point(x=xAxis,y=yAxis,z=zAxis), acceptedBlocks[randomInt])
 
-# make the agent take a step
-def generateStep(agent):
-    agentAction = agent.takeAction()
-    blocks = client.readCube(Cube(
-        min=agent.minBoundary,
-        max=agent.maxBoundary
-    ))
-    return blocks
-
-'''
 # function to transform blocks into input for the model to predict on
-def oneHotTransformInput(inputBlocks, action, minPoint, acceptedBlocks, dictForOneHotMapping):
+def transformInputForModel(inputBlocks, minPoint):
+
     # dict to map cube types to ordinal values
     value_map = {5: 0, 41: 1, 60: 2, 88: 3, 131: 4, 160: 5, 224: 6, 247: 7}
+
+    # initialize empty array of AIR with correct size
     threedArr = np.full((6,6,6), 5)
 
+    # for each block
     for block in inputBlocks.blocks:
         threedArr[block.position.x-minPoint.x][block.position.y-minPoint.y][block.position.z-minPoint.z] = block.type
 
     # flatten the array
     flattenedArray = np.stack(threedArr, axis=1).flatten()
-    flattenedArray = np.append(flattenedArray, action)
 
-    df = pd.DataFrame(flattenedArray)
+    # push the flattned array into a dataframe as a row
+    df = pd.DataFrame(flattenedArray).T
 
     # Map block values to ordinal via value_map
     for row_idx in range(len(df)):
-        # cols = df.iloc[row_idx].values
-        # for col_idx in range(len(cols)):
-        df.iloc[row_idx] = value_map.get(cols[col_idx], 8)
-        # y[row_idx] = value_map.get(y[row_idx], 8)
+        cols = df.iloc[row_idx].values
+        for col_idx in range(len(cols)):
+            df.iloc[row_idx,col_idx] = value_map.get(cols[col_idx], 8)
 
     # Convert df to onehot
-
     X = []
     for row_idx in range(len(df)):
         cols = df.iloc[row_idx].values
@@ -75,40 +68,61 @@ def oneHotTransformInput(inputBlocks, action, minPoint, acceptedBlocks, dictForO
             new_row.append(new_onehot)
         new_row = np.array(new_row).reshape(HOUSE_HEIGHT,HOUSE_WIDTH,HOUSE_DEPTH,ACTION_SPACE)
         X.append(new_row)
-
-        # y[row_idx] = value_map.get(y[row_idx], 8)
+    
     X = np.array(X)
+    print("Length of input", len(X))
     return X
-'''
+
 
 # main function
 if __name__ == '__main__':
+
+    # clear the world
+    clearMin = Point(x=-100, y=0, z=-50)
+    clearMax = Point(x=100, y=100, z=50)
+    worldReset(clearMin, clearMax)
 
     # generate noise block
     generateRandomNoiseBlock(Point(x=0,y=4,z=0), 6)
 
     # load the saved model
-    model = tf.keras.models.load_model('models/saved_model')
-    model.summary()
+    loadedModel = tf.keras.models.load_model('models')
+    loadedModel.summary()
 
-'''
-    # Initialize the builderAgent to start at the noise block
-    agent = builderAgent(location)
+    #######################  need to be fixed without hard-code ###############
+    # go through all the blocks
+    for xAxis in range(0, 6):
+        for yAxis in range(4, 10):
+            for zAxis in range(0, 6):
+                excludingType = [5, 93, 10, 60]
+                minMax = locateMinMax(Point(x=-1, y=0, z=-1), Point(x=7, y=10, z=7), excludingType)
 
-    # agent will move through the noise block
-    for loop to move the agent across the noise block:
+                # Get the current building data
+                currBuilding = client.readCube(Cube(
+                    min=minMax[0],
+                    max=minMax[1]
+                ))
+                # print(currBuilding)
+                moveToCoord = Point(x=0,y=4,z=0)
+                newMinMax = [moveToCoord, Point(x=moveToCoord.x+5, y=moveToCoord.y+5, z=moveToCoord.z+5)]
 
-        inputBlocks = generateStep(agent)
+                # Process the blocks data
+                oneHotEncodedInputBlocks = transformInputForModel(currBuilding, newMinMax[0])
 
-        # one-hot encode the inputBlocks to feed to model 
+                # Predict the block to replace current position block using the model 
+                predictions = loadedModel.predict(oneHotEncodedInputBlocks)
+                print("Predictions=", predictions)
+                
+                # Generate arg maxes for predictions
+                predictedNewBlock = np.argmax(predictions, axis = 1)
+                predictedNewBlock = predictedNewBlock[0] - 7
+                print("Predicted new block -> ", predictedNewBlock, )
 
-        oneHotEncodedInputBlocks = oneHotTransformInput(inputBlocks)
-        # Predict the block to replace current position block using the model 
-        predictedNewBlock = model.predict(oneHotEncodedInputBlocks)
+                # dict to map ordinal values to cube types
+                reverseValueMap = {0:5, 1:41, 2:60, 3:88, 4:131, 5:160, 6:224, 7:247, 8: 5}
 
-        # replace the current location of agent with the predicted block
-        singleBlockChange(Point(x=x,y=y,z=z), predictedNewBlock)
+                # replace the current location of agent with the predicted block
+                singleBlockChange(Point(x=xAxis,y=yAxis,z=zAxis), reverseValueMap[predictedNewBlock])
 
-        # copy agent action to show building being built
-        singleBlockChange(Point(x=x + 10,y=y,z=z), predictedNewBlock)
-'''
+                # copy agent action to show building being built
+                singleBlockChange(Point(x=xAxis + 15,y=yAxis,z=zAxis), reverseValueMap[predictedNewBlock])
