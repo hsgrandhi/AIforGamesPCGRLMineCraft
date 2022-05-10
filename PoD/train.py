@@ -3,6 +3,7 @@ from tensorflow.keras.callbacks import ModelCheckpoint
 import pandas as pd
 import numpy as np
 from keras.utils import np_utils
+import os
 import sys
 
 # Set variables
@@ -10,52 +11,73 @@ HOUSE_WIDTH = 6
 HOUSE_HEIGHT = 6
 HOUSE_DEPTH = 6
 TARGET_COL = 216
-ACTION_SPACE = 9
-DATA_FILE = "buildingData2.csv"
+ACTION_SPACE = 8
 MODEL_PATH = "models"
 
-##### Ye to change -1 to same block value -> change 9 to 8 ####
-
+# DATA_FILE = "buildingData2.csv"
 # value_map = {5: 0, 41: 1, 224: 2, 60: 3, 160: 4, 131: 5, 88: 6}
+
+# df = pd.read_csv(DATA_FILE, header=None)
+# print(f"df shape {len(df)} rows {len(df.iloc[0])} cols")
+# print(f"df: \n{df.head()}\n\n")
+
+
 value_map = {5: 0, 41: 1, 60: 2, 88: 3, 131: 4, 160: 5, 224: 6, 247: 7}
 
-# for file in os.listdir(pod_root_path):
-#     print(f"compiling df {file}")
-#     df = pd.read_csv(f"{pod_root_path}/{file}")
-#     dfs.append(df)
+# generate column numbers for each column(216 cubes + target)
+colnames = list(range(0, 217))
 
-# df = pd.concat(dfs)
+# read each file in the dataset path and add to a dataframe
+pod_root_path = '../dataset/csvs'
+dfs = []
+for file in os.listdir(pod_root_path):
+    df = pd.read_csv(f"{pod_root_path}/{file}", names=colnames, header=None)
+    print(f"compiling df {file} -> df shape is: {len(df)} rows - {len(df.iloc[0])} cols")
+    df.reset_index(drop=True)
+    print(df.head(3))
+    dfs.append(df)
 
-df = pd.read_csv(DATA_FILE, header=None)
-print(f"df shape {len(df)} rows {len(df.iloc[0])} cols")
-print(f"df: \n{df.head()}\n\n")
-
+# combine all the df and get last column from combined df then set to y
+df = pd.concat(dfs)
 df = df.sample(frac=1).reset_index(drop=True)
 y = df.iloc[:, -1].values
+
+# drop the target column after getting y labels
 df.drop(TARGET_COL, axis=1, inplace=True)
 y = y.astype('int32')
 
+# check target and final df structure
+print(y,"Target labels")
+print(df.head(3), "final df")
+
+print("Mapping values....")
 # Map block values to ordinal via value_map
 for row_idx in range(len(df)):
+    if row_idx % 50000 == 0:
+        print(row_idx)
     cols = df.iloc[row_idx].values
     for col_idx in range(len(cols)):
         df.iloc[row_idx,col_idx] = value_map.get(cols[col_idx], 8)
     y[row_idx] = value_map.get(y[row_idx], 8)
 
+print("Converting df to one-hot....")
 X = []
 # Convert df to onehot
 for row_idx in range(len(df)):
+    if row_idx % 50000 == 0:
+        print(row_idx)
     cols = df.iloc[row_idx].values
     new_row = []
     for col_idx in range(len(cols)):
-        new_onehot = [0]*9
+        new_onehot = [0]*8
         new_onehot[df.iloc[row_idx, col_idx]] = 1
         new_row.append(new_onehot)
     new_row = np.array(new_row).reshape(HOUSE_HEIGHT,HOUSE_WIDTH,HOUSE_DEPTH,ACTION_SPACE)
     X.append(new_row)
 
-    y[row_idx] = value_map.get(y[row_idx], 9)
+    y[row_idx] = value_map.get(y[row_idx], 8)
 
+print("Converting y to one-hot....")
 # convert y to onehot
 y = np_utils.to_categorical(y)
 X = np.array(X)
@@ -70,9 +92,9 @@ model = tf.keras.models.Sequential([
         tf.keras.layers.Flatten(),
         tf.keras.layers.Dense(9, activation='softmax')
     ])
-
 model.summary()
 
+print("Training Model....")
 model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=[tf.keras.metrics.CategoricalAccuracy()])
 mcp_save = ModelCheckpoint(MODEL_PATH, save_best_only=True, monitor='categorical_accuracy', mode='max')
 history = model.fit(X, y, epochs=500, steps_per_epoch=64, verbose=2, callbacks=[mcp_save])
