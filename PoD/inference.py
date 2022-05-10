@@ -56,6 +56,7 @@ def transformInputForModel(inputBlocks, minPoint):
         cols = df.iloc[row_idx].values
         for col_idx in range(len(cols)):
             df.iloc[row_idx,col_idx] = value_map.get(cols[col_idx], 8)
+    print(df.head())
 
     # Convert df to onehot
     X = []
@@ -70,7 +71,6 @@ def transformInputForModel(inputBlocks, minPoint):
         X.append(new_row)
     
     X = np.array(X)
-    print("Length of input", len(X))
     return X
 
 
@@ -115,8 +115,8 @@ if __name__ == '__main__':
                 
                 # Generate arg maxes for predictions
                 predictedNewBlock = np.argmax(predictions, axis = 1)
-                predictedNewBlock = predictedNewBlock[0] - 7
-                print("Predicted new block -> ", predictedNewBlock, )
+                predictedNewBlock = predictedNewBlock[0]
+                print("Predicted new block -> ", predictedNewBlock)
 
                 # dict to map ordinal values to cube types
                 reverseValueMap = {0:5, 1:41, 2:60, 3:88, 4:131, 5:160, 6:224, 7:247, 8: 5}
