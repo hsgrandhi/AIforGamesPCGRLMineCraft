@@ -266,28 +266,24 @@ def renderState(state, currMin, size):
 
     blockIndex = 0
 
-    """
+
     for block in currentHouse.blocks:
         print(block.position)
         block.type = int(state[blockIndex])
         blockIndex += 1
-    """
+  
         #try orientation x, z, y
-    """
-    for i in range(size.x):
-        for j in range(size.y):
-            for k in range(size.z):
-                currentHouse.blocks[blockIndex].type = int(state[blockIndex])
-                #singleBlockChange(Point(x=i,y=j,z=k), currentHouse.blocks[blockIndex].type)
-                blockIndex += 1
+    
     """
     #doing so to get the correct orientation, since the orientation is wrong in csv file, instead of z, y, x, it goes x, y, z
     for i in range(currMin.y, currMin.y + size.y):
         for j in range(currMin.x, currMin.x + size.x):
             for k in range(currMin.z, currMin.z + size.z):
+                print("current location is: ", k, )
                 singleBlockChange(Point(x=k,y=i,z=j), currentHouse.blocks[blockIndex].type)
                 blockIndex += 1
-    #client.spawnBlocks(currentHouse)
+    """
+    client.spawnBlocks(currentHouse)
     
 
 
@@ -313,6 +309,8 @@ if __name__ == '__main__':
     minMax = locateMinMax(Point(x=40, y=0, z=0), Point(x=60, y=10, z=20), excludingType)
     print ("minMax is: ", minMax)
     
+
+    """
     ############## Code used to move the building to correct location and preprocess it contained tiles ##########
   
     #use this processing function to swap out unwant blocks
@@ -343,7 +341,7 @@ if __name__ == '__main__':
     for block in currBuilding.blocks:
         print(block)
 
-  
+  """
 
 
 
@@ -359,7 +357,7 @@ if __name__ == '__main__':
     #client.spawnBlocks(currBuilding)
 
 
-    """
+    
     ########### Code use to read in csv and test the csv data's correctness #############
     #readResult = readInCSV("buildingData0.csv")
     readResult = read_csv("buildingData0.csv")
@@ -370,4 +368,3 @@ if __name__ == '__main__':
     
     renderState(houseState[0], Point(x=0, y=4, z=0), Point(x=6, y=6, z=6))
 
-    """
