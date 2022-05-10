@@ -14,14 +14,17 @@ TARGET_COL = 216
 ACTION_SPACE = 8
 MODEL_PATH = "models"
 
-# DATA_FILE = "buildingData2.csv"
-# value_map = {5: 0, 41: 1, 224: 2, 60: 3, 160: 4, 131: 5, 88: 6}
+'''
+# use this if data is in single CSV file
+DATA_FILE = "buildingData2.csv"
+value_map = {5: 0, 41: 1, 224: 2, 60: 3, 160: 4, 131: 5, 88: 6}
 
-# df = pd.read_csv(DATA_FILE, header=None)
-# print(f"df shape {len(df)} rows {len(df.iloc[0])} cols")
-# print(f"df: \n{df.head()}\n\n")
+df = pd.read_csv(DATA_FILE, header=None)
+print(f"df shape {len(df)} rows {len(df.iloc[0])} cols")
+print(f"df: \n{df.head()}\n\n")
+'''
 
-
+# dict to map cube types to ordinal values
 value_map = {5: 0, 41: 1, 60: 2, 88: 3, 131: 4, 160: 5, 224: 6, 247: 7}
 
 # generate column numbers for each column(216 cubes + target)
@@ -50,8 +53,8 @@ y = y.astype('int32')
 print(y,"Target labels")
 print(df.head(3), "final df")
 
-print("Mapping values....")
 # Map block values to ordinal via value_map
+print("Mapping values....")
 for row_idx in range(len(df)):
     if row_idx % 50000 == 0:
         print(row_idx)
@@ -60,9 +63,9 @@ for row_idx in range(len(df)):
         df.iloc[row_idx,col_idx] = value_map.get(cols[col_idx], 8)
     y[row_idx] = value_map.get(y[row_idx], 8)
 
+# Convert df to onehot
 print("Converting df to one-hot....")
 X = []
-# Convert df to onehot
 for row_idx in range(len(df)):
     if row_idx % 50000 == 0:
         print(row_idx)
@@ -77,10 +80,14 @@ for row_idx in range(len(df)):
 
     y[row_idx] = value_map.get(y[row_idx], 8)
 
-print("Converting y to one-hot....")
 # convert y to onehot
+print("Converting y to one-hot....")
 y = np_utils.to_categorical(y)
 X = np.array(X)
+
+# save the files after processing so we dont need to do the process again.
+np.save('../processedData/10filesOneHotX.npy', X)
+np.save('../processedData/10filesOneHoty.npy', y)
 
 # Define model
 model = tf.keras.models.Sequential([
@@ -94,9 +101,14 @@ model = tf.keras.models.Sequential([
     ])
 model.summary()
 
+# if data is stored already as .npy
+# y = np.load('../processedData/10filesOneHoty.npy')
+# X = np.load('../processedData/10filesOneHotX.npy')
+
+# Train the model
 print("Training Model....")
 model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=[tf.keras.metrics.CategoricalAccuracy()])
 mcp_save = ModelCheckpoint(MODEL_PATH, save_best_only=True, monitor='categorical_accuracy', mode='max')
-history = model.fit(X, y, epochs=500, steps_per_epoch=64, verbose=2, callbacks=[mcp_save])
+history = model.fit(X, y, epochs=500, steps_per_epoch=256, verbose=2, callbacks=[mcp_save])
 
 

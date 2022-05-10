@@ -218,11 +218,13 @@ def transformStateActionToCSV(blocks, action, minPoint, acceptedBlocks, dictForO
     secondFileName = fileName
     threedArr2 = np.full((6,6,6), 5)
     print(threedArr2.shape)
+
     for block in blocks.blocks:
         #print("index is: ", block.position.x-41, block.position.y-3, block.position.z-11)
         # threedArr[block.position.x-minPoint.x][block.position.y-minPoint.y][block.position.z-minPoint.z] = block.type
         threedArr2[block.position.x-minPoint.x][block.position.y-minPoint.y][block.position.z-minPoint.z] = block.type
     #print(threedArr)
+
     # flatten the array
     flattenedArray2 = np.stack(threedArr2, axis=1).flatten()
     flattenedArray2 = np.append(flattenedArray2, action)
@@ -239,7 +241,6 @@ def genEpisodes(houseData, min, max, iter = 1, fileName = "buildingData.csv"):
             #agent.takeAction()
             step = generateStep(agent)
             # trainingData.append(step, accurateMin, accurateMax)
-            
             transformStateActionToCSV(step[0], step[1], newMinMax[0], acceptedBlocks, dict_one_hot_mapping, fileName)
 
         #Once is traversed, destroy the current building and spawn the original back using the houseData
@@ -277,8 +278,6 @@ if __name__ == '__main__':
     # if TORCH in currentBlocks:
     #     currentBlocks.remove(TORCH)
 
-  
-
     #use this processing function to swap out unwant blocks
     # nbtProcessing(minMax[0], minMax[1], currentBlocks)
     nbtProcessing(minMax[0], minMax[1], acceptedBlocks)
@@ -310,8 +309,6 @@ if __name__ == '__main__':
     print(newMinMax)
     
     #Record the current building data to be later spawned so multiple episode can be generated
-    
-    
     currBuilding = client.readCube(Cube(
         min=newMinMax[0],
         max=newMinMax[1]
@@ -320,57 +317,15 @@ if __name__ == '__main__':
     for i in range (20):
         fileName = "buildingData" + str(i) + ".csv"
         genEpisodes(currBuilding, newMinMax[0], newMinMax[1], 230, fileName)
-    
-    
-
-    #client.spawnBlocks(currBuilding)
-
-    
-
-
-
-
 
     """
     agent = PoDAgent(newMinMax[0], newMinMax[1])
-    
-   
-    
     # trainingData = []
-
     #debug
-    
     while not agent.reachEnd:
         step = generateStep(agent)
         # trainingData.append(step, accurateMin, accurateMax)
         transformStateActionToCSV(step[0], step[1], newMinMax[0], acceptedBlocks, dict_one_hot_mapping)
     """
-    
-
-    # print (trainingData)
-    
-
-
-
-    #print(trainingData)
-   
-    
-   
-    #example syntax to use the readCube result, Blocks type obj
-    #print (blocks.blocks[0].type)
-
-
-
-    #read func test (flying machine loc)
-    #minPoint = Point(x=1, y=5, z=-4)
-    #maxPoint = Point(x=1, y=6, z=1)
-
-    #output = []
-    #output = destroyer(minPoint, maxPoint)
-    #print(output)
-    #readBlocks = readSingleCubes(minPoint, maxPoint)
-
-    #print("below is single read result")
-    #print(readBlocks[0])   
 
 
