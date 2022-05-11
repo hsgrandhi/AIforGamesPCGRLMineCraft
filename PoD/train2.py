@@ -82,6 +82,6 @@ model.summary()
 print("Training Model....")
 model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=[tf.keras.metrics.CategoricalAccuracy()])
 mcp_save = ModelCheckpoint(MODEL_PATH, save_best_only=True, monitor='categorical_accuracy', mode='max')
-history = model.fit(X, y, epochs=500, steps_per_epoch=256, verbose=2, callbacks=[mcp_save])
+history = model.fit(X, y, epochs=500, steps_per_epoch=64, verbose=2, callbacks=[mcp_save])
 
 

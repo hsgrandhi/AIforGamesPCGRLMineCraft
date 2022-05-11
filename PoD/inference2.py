@@ -61,6 +61,10 @@ def transformInputForModel(inputBlocks, oneHotValues):
 # main function
 if __name__ == '__main__':
 
+    # load the saved model
+    loadedModel = tf.keras.models.load_model('/Users/hsgra/Desktop/AIforGamesPCGRLMineCraft/PoD/prePaddedModel.h5')
+    loadedModel.summary()
+
     # clear the world
     clearMin = Point(x=-100, y=0, z=-50)
     clearMax = Point(x=100, y=100, z=50)
@@ -68,11 +72,7 @@ if __name__ == '__main__':
 
     # generate noise block
     generateRandomNoiseBlock(Point(x=0,y=4,z=0), 6)
-
-    # load the saved model
-    loadedModel = tf.keras.models.load_model('prePaddedModel.h5')
-    loadedModel.summary()
-
+ 
     # generate oneHotMapping
     oneHotValues = {}
     for block in acceptedBlocks:
