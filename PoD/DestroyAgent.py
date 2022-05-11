@@ -19,6 +19,8 @@ class PoDAgent:
         self.minBoundary = minBound
         self.maxBoundary = maxBound
 
+        
+
         #start from minboundary to move the agent
         self.currPosition = deepcopy(self.minBoundary) 
         
@@ -40,8 +42,48 @@ class PoDAgent:
 
         return blocks.blocks[0].type
     
+
+    def takeActionWPadding(self):
+        #print ("action is taken")
+        self.generatePadding()
+        coinToss = random.randint(0, 100)
+        
+        
+        #action, which is the original tile type before change been made is recorded here
+        action = self.getBlockType(self.currPosition)
+        #proceed to take next step of destruction
+        #Destruction traverse order is: z -> y -> x
+        if coinToss <= self.coinFlip:
+            #block will be changed to one of the type in tile Selection
+            randomTile = random.randint(0, 7)
+            tileChangeTo = self.selectedTiles[randomTile]
+            self.singleBlockChange(self.currPosition, tileChangeTo)
+        #after change or not move on to next target
+        if self.currPosition.z + 1 < self.maxBoundary.z + 1:
+            self.currPosition.z += 1
+        elif self.currPosition.y + 1 < self.maxBoundary.y + 1:
+            #print("z should reset")
+            self.currPosition.z = self.minBoundary.z
+            self.currPosition.y += 1
+        elif self.currPosition.x + 1 < self.maxBoundary.x + 1:
+            self.currPosition.z = self.minBoundary.z
+            self.currPosition.y = self.minBoundary.y
+            self.currPosition.x += 1
+        #meet maxBoundary
+        else:
+            print("boundary reached")
+            self.reachEnd = True
+            return action
+
+        #print("new location is: ", self.currPosition)
+
+         
+
+        return action
+
     def takeAction(self):
         #print ("action is taken")
+        
         coinToss = random.randint(0, 100)
         
         

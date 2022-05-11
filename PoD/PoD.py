@@ -8,7 +8,7 @@ from minecraft_pb2 import *
 import random
 import numpy as np
 
-from DestroyAgent import PoDAgent
+from DestroyAgent import *
 
 import csv
 import pandas as pd
@@ -155,16 +155,35 @@ def moveNBT(currMin, currMax, targetMin):
             for k in range(targetMin.z, targetMin.z + blocksOnZ):
                 singleBlockChange(Point(x=i,y=j,z=k), currentHouse.blocks[blockIndex].type)
                 blockIndex += 1
-                    
+
+
+def generatePadding(location, size, material):
+    print("generate padding block")
+    min = Point(x=location.x - size.x,y=location.y - size.y,z=location.z - size.z)
+    max = Point(x=location.x + size.x,y=location.y + size.y,z=location.z + size.z)
+    
+    clearOut(min, max, material)
+    output = [min, max]
+    return output                 
+
+
 # make the agent take a step
-def generateStep(agent):
+def generateStep(agent, paddingSize):
     #print ("generating step")
     agentAction = agent.takeAction()
+
     blocks = client.readCube(Cube(
         min=agent.minBoundary,
         max=agent.maxBoundary
     ))
-    output = (blocks, agentAction)
+    #do padding in order to encode location data
+    tempMinMax = generatePadding(agent.currPosition, paddingSize, GLASS)
+    client.spawnBlocks(blocks)
+    finalResult = client.readCube(Cube(
+        min=tempMinMax[0],
+        max=tempMinMax[1]
+    ))
+    output = (finalResult, agentAction)
     return output
 
 # transform current building state to array and push to csv
@@ -204,12 +223,12 @@ def transformStateActionToCSV(blocks, action, minPoint, acceptedBlocks, dictForO
 
 ############################### Generate other csv without encoding to understand better########################
     secondFileName = fileName
-    threedArr2 = np.full((6,6,6), 5)
+    threedArr2 = np.full((14,14,14), 5)
     print(threedArr2.shape)
     for block in blocks.blocks:
         #print("index is: ", block.position.x-41, block.position.y-3, block.position.z-11)
         # threedArr[block.position.x-minPoint.x][block.position.y-minPoint.y][block.position.z-minPoint.z] = block.type
-        threedArr2[block.position.x-minPoint.x][block.position.y-minPoint.y][block.position.z-minPoint.z] = block.type
+        threedArr2[block.position.y-minPoint.y][block.position.x-minPoint.x][block.position.z-minPoint.z] = block.type
     #print(threedArr)
     # flatten the array
     flattenedArray2 = np.stack(threedArr2, axis=1).flatten()
@@ -219,13 +238,15 @@ def transformStateActionToCSV(blocks, action, minPoint, acceptedBlocks, dictForO
         writer = csv.writer(f2)
         writer.writerow(flattenedArray2)
    
+
+# TODO: Add padding to this   
 def genEpisodes(houseData, min, max, iter = 1, fileName = "buildingData.csv"):
     for i in range(iter):
         print("begin iteration ", i)
         agent = PoDAgent(min, max)
         while not agent.reachEnd:
             #agent.takeAction()
-            step = generateStep(agent)
+            step = generateStep(agent, Point(x=6,y=6,z=6))
             # trainingData.append(step, accurateMin, accurateMax)
             
             transformStateActionToCSV(step[0], step[1], min, acceptedBlocks, dict_one_hot_mapping, fileName)
@@ -287,12 +308,23 @@ def renderState(state, currMin, size):
     
 
 
+    
+  
 
 if __name__ == '__main__':
 
 #x varies 50 - 53, z vaires -20 - 40, y varies 2 - 6
 #load_coord=(50,10,1)
 #the load coordinate function is have x, z, y instead
+
+
+
+
+
+
+
+    """
+    
 
     accurateMin = Point(x=50, y=2, z=10)
     accurateMax = Point(x=53, y=6, z=15)
@@ -309,8 +341,8 @@ if __name__ == '__main__':
     minMax = locateMinMax(Point(x=40, y=0, z=0), Point(x=60, y=10, z=20), excludingType)
     print ("minMax is: ", minMax)
     
+ 
 
-    """
     ############## Code used to move the building to correct location and preprocess it contained tiles ##########
   
     #use this processing function to swap out unwant blocks
@@ -323,7 +355,7 @@ if __name__ == '__main__':
     
     #Move the building to a new location and update the new min max location
     # y=4 is the min, if lower, it will destroy the ground layer, while x, z are the origin
-    moveToCoord = Point(x=0,y=4,z=0)
+    moveToCoord = Point(x=0,y=10,z=0)
     
     moveNBT(minMax[0], minMax[1], moveToCoord)
     
@@ -341,30 +373,75 @@ if __name__ == '__main__':
     for block in currBuilding.blocks:
         print(block)
 
-  """
 
 
 
+    
     ############## Code used to generate training data, will take about 2 days to run ##########
 
-    """
-    for i in range (20):
-        fileName = "buildingData" + str(i) + ".csv"
-        genEpisodes(currBuilding, newMinMax[0], newMinMax[1], 230, fileName)
-    """
+
+    for i in range (1):
+        fileName = "buildingData" + str(6) + ".csv"
+        genEpisodes(currBuilding, newMinMax[0], newMinMax[1], 1, fileName)
     
+   
+    
+
+
+    """
+
+
+
+
+
+
+
 
     #client.spawnBlocks(currBuilding)
 
 
-    
-    ########### Code use to read in csv and test the csv data's correctness #############
-    #readResult = readInCSV("buildingData0.csv")
-    readResult = read_csv("buildingData0.csv")
-    houseState = readResult.values.tolist()
-    #remove the last one since it's action
-    houseState.pop()
-    print("state change is: ", houseState[0])
-    
-    renderState(houseState[0], Point(x=0, y=4, z=0), Point(x=6, y=6, z=6))
 
+
+
+
+
+
+    
+    ########## Code use to read in csv and test the csv data's correctness #############
+    readResult = read_csv("buildingData6.csv")
+    houseState = readResult.values.tolist()
+  
+    #renderState(houseState[214], Point(x=0, y=4, z=0), Point(x=6, y=6, z=6))
+    
+    # readHouse = client.readCube(Cube(min=Point(x=0, y=4, z=0), max=Point(x=6,y=10,z=6)))
+    # print("action is: ", actions)
+    
+
+    # buildAgent = buildAgent(Point(x=0, y=4, z=0), Point(x=6, y=10, z=6))
+    # index = 214
+
+    # while index > -1:
+    #     #print("agent location: ", buildAgent.currPosition)
+
+    #     action = houseState[index][-1]
+        
+    #     print("action is: ", action, "index is: ", index)
+    #     index-=1
+    #     buildAgent.repair(action)
+
+
+    # accuMin = Point(x=0, y=4, z=0)
+    # accuMax = Point(x=6,y=10,z=6)
+    # blockIndex = 214
+    # for i in range(accuMax.x - 1, accuMin.x - 1, -1):
+    #     for j in range(accuMax.y - 1, accuMin.y - 1, -1):
+    #         for k in range(accuMax.z - 1, accuMin.z - 1, -1):
+    #             singleBlockChange(Point(x=i,y=j,z=k), houseState[blockIndex][-1])
+    #             blockIndex -= 1
+               
+
+    for i in range(210):
+        renderState(houseState[214 - i], Point(x=0, y=10, z=0), Point(x=14, y=14, z=14))
+  
+    #Big house size is 14 remember
+ 
