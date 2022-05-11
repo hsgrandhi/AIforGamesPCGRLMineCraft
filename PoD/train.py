@@ -116,6 +116,7 @@ for row_idx in range(len(df)):
 print("Converting y to one-hot....")
 y = np_utils.to_categorical(y)
 X = np.array(X)
+print("shape of X:", X.shape)
 
 # save the files after processing so we dont need to do the process again.
 # np.save('../processedData/10filesOneHotX.npy', X)
