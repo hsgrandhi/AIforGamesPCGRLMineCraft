@@ -257,11 +257,14 @@ def genEpisodes(houseData, min, max, iter = 1, fileName = "buildingData.csv", te
         client.spawnBlocks(houseData)
     
 
-def fastGenEpisodes(min, max, iter = 1, paddingSize = 0, acceptedBlocks = [], fileName = "buildingData.csv"):
+def fastGenEpisodes(houseData, min, max, iter = 1, paddingSize = 0, acceptedBlocks = [], fileName = "buildingData.csv"):
     for i in range(iter):
         print("begin iteration ", i)
         agent = PoDAgent(min, max)
         agent.fastAction(paddingSize, acceptedBlocks, fileName)
+        print("iteration ", i, " finished")
+        clearOut(min, max, AIR)
+        client.spawnBlocks(houseData)
 
 
 def reverseDestruction(data):
@@ -379,9 +382,9 @@ if __name__ == '__main__':
     #     genEpisodes(currBuilding, newMinMax[0], newMinMax[1], 1, fileName, testData)
 
     
-    for i in range(1):
+    for i in range(2):
         fileName = "buildingData" + str(i) + ".csv"
-        fastGenEpisodes(newMinMax[0], newMinMax[1], 1, Point(x=6,y=6,z=6), acceptedBlocks, fileName)
+        fastGenEpisodes(currBuilding, newMinMax[0], newMinMax[1], 50, Point(x=6,y=6,z=6), acceptedBlocks, fileName)
         
 
     # clearOut(Point(x=-20, y=4, z=-20), Point(x=50, y=50, z=50))
