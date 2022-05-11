@@ -13,10 +13,10 @@ from worldControl import worldReset
 from copy import deepcopy
 
 # Set variables
-HOUSE_WIDTH = 6
-HOUSE_HEIGHT = 6
-HOUSE_DEPTH = 6
-TARGET_COL = 216
+HOUSE_WIDTH = 13
+HOUSE_HEIGHT = 13
+HOUSE_DEPTH = 13
+TARGET_COL = 2197
 ACTION_SPACE = 8
 
 # connect to the server
@@ -41,11 +41,11 @@ def transformInputForModel(inputBlocks, minPoint):
     value_map = {5: 0, 41: 1, 60: 2, 88: 3, 131: 4, 160: 5, 224: 6, 247: 7}
 
     # initialize empty array of AIR with correct size
-    threedArr = np.full((6,6,6), 5)
+    threedArr = np.full((13,13,13), 5)
 
     # for each block
     for block in inputBlocks.blocks:
-        threedArr[block.position.x-minPoint.x][block.position.y-minPoint.y][block.position.z-minPoint.z] = block.type
+        threedArr[block.position.y-minPoint.y][block.position.x-minPoint.x][block.position.z-minPoint.z] = block.type
 
     # flatten the array
     flattenedArray = np.stack(threedArr, axis=1).flatten()
@@ -75,7 +75,7 @@ def transformInputForModel(inputBlocks, minPoint):
     X = np.array(X)
     return X
 
-
+'''
 class recoverAgent:
     def __init__(self, minBound = Point(x=0,y=0,z=0), maxBound = Point(x=0,y=0,z=0)):
         
@@ -143,10 +143,8 @@ class recoverAgent:
             return action
 
         #print("new location is: ", self.currPosition)
-
-         
-
         return action
+'''
 
 # main function
 if __name__ == '__main__':

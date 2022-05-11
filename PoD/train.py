@@ -10,10 +10,10 @@ import sys
 print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
 
 # Set variables
-HOUSE_WIDTH = 6
-HOUSE_HEIGHT = 6
-HOUSE_DEPTH = 6
-TARGET_COL = 216
+HOUSE_WIDTH = 13
+HOUSE_HEIGHT = 13
+HOUSE_DEPTH = 13
+TARGET_COL = 2197
 ACTION_SPACE = 8
 MODEL_PATH = "models"
 
@@ -40,8 +40,8 @@ print(f"df: \n{df.head()}\n\n")
 '''
 value_map = {5: 0, 41: 1, 60: 2, 88: 3, 131: 4, 160: 5, 224: 6, 247: 7}
 
-# generate column numbers for each column(216 cubes + target)
-colnames = list(range(0, 217))
+# generate column numbers for each column(13 x 13 x 13 = 2197 cubes + 1 target)
+colnames = list(range(0, 2198))
 
 # read each file in the dataset path and add to a dataframe
 pod_root_path = '../dataset/csvs'
