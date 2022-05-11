@@ -45,13 +45,7 @@ def singleBlockChange (position, selectedType):
                     ), type=selectedType))
 
 def clearOut(minPoint, maxPoint, cubeType = "AIR"):
-    client.fillCube(FillCubeRequest(  # Clear a 20x10x20 working area
-        cube=Cube(
-            min = minPoint,
-            max = maxPoint
-        ),
-        type=cubeType
-    ))
+    client.fillCube(FillCubeRequest(cube=Cube(min = minPoint,max = maxPoint),type=cubeType))
 #by default grass and air are excluded, can also be diyed
 def locateMinMax(minPoint, maxPoint, excludingType=[5, 93]):
 
@@ -168,7 +162,7 @@ def generatePadding(location, size, material):
 
 
 # make the agent take a step
-def generateStep(agent, paddingSize):
+def generateStep(agent, paddingSize, testData = []):
     #print ("generating step")
     agentAction = agent.takeAction()
 
@@ -177,13 +171,20 @@ def generateStep(agent, paddingSize):
         max=agent.maxBoundary
     ))
     #do padding in order to encode location data
-    tempMinMax = generatePadding(agent.currPosition, paddingSize, AIR)
+    tempMinMax = generatePadding(agent.currPosition, paddingSize, GLASS)
+    #print ("temp Min Max is: ", tempMinMax)
+    #print("house min max is: ", agent.minMound, agent.maxBound)
     client.spawnBlocks(blocks)
     finalResult = client.readCube(Cube(
         min=tempMinMax[0],
         max=tempMinMax[1]
     ))
+    testData.append(finalResult)
+    for i in range(3):
+        print (finalResult.blocks[i].type)
     output = (finalResult, agentAction)
+    agent.makeAMove()
+
     return output
 
 # transform current building state to array and push to csv
@@ -206,7 +207,7 @@ def transformStateActionToCSV(blocks, action, minPoint, acceptedBlocks, dictForO
     print(threedArr.shape)
     for block in blocks.blocks:
         print("block is: ", block.type)
-        threedArr[block.position.x-minPoint.x][block.position.y-minPoint.y][block.position.z-minPoint.z] = oneHotValues[block.type]
+        threedArr[block.position.y-minPoint.y][block.position.x-minPoint.x][block.position.z-minPoint.z] = oneHotValues[block.type]
     print(threedArr)
     
     # flatten the array
@@ -240,13 +241,13 @@ def transformStateActionToCSV(blocks, action, minPoint, acceptedBlocks, dictForO
    
 
 # TODO: Add padding to this   
-def genEpisodes(houseData, min, max, iter = 1, fileName = "buildingData.csv"):
+def genEpisodes(houseData, min, max, iter = 1, fileName = "buildingData.csv", testData = []):
     for i in range(iter):
         print("begin iteration ", i)
         agent = PoDAgent(min, max)
         while not agent.reachEnd:
             #agent.takeAction()
-            step = generateStep(agent, Point(x=6,y=6,z=6))
+            step = generateStep(agent, Point(x=6,y=6,z=6), testData)
             # trainingData.append(step, accurateMin, accurateMax)
             
             transformStateActionToCSV(step[0], step[1], min, acceptedBlocks, dict_one_hot_mapping, fileName)
@@ -256,16 +257,10 @@ def genEpisodes(houseData, min, max, iter = 1, fileName = "buildingData.csv"):
         client.spawnBlocks(houseData)
     
 
-def readInCSV(fileName):
-    print("csv is read")
-    output = []
-    with open(fileName, newline='') as csvfile:
-        spamreader = csv.reader(csvfile, delimiter=' ', quotechar='|')
-
-        for row in spamreader:
-            #print(', '.join(row))
-            output.append(row)
-    return output
+def fastGenEpisodes(min, max, iter = 1, paddingSize = 0, acceptedBlocks = [], fileName = "buildingData.csv", testData = []):
+    for i in range(iter):
+        agent = PoDAgent(min, max)
+        agent.fastAction(paddingSize, acceptedBlocks, fileName, testData)
 
 
 def reverseDestruction(data):
@@ -324,8 +319,7 @@ if __name__ == '__main__':
 
 
     
-
-    """
+   
     accurateMin = Point(x=50, y=2, z=10)
     accurateMax = Point(x=53, y=6, z=15)
 
@@ -333,10 +327,10 @@ if __name__ == '__main__':
     excludingType = [5, 93, 10, 60]
 
     # block types that we will allow
-    acceptedBlocks = [5, 41, 60, 88, 131, 160, 224, 247]
+    acceptedBlocks = [5, 41, 60, 88, 131, 160, 224]
 
     # dictionary for one-hot mapping
-    dict_one_hot_mapping = {5: 0, 41: 1, 60: 2, 88: 3, 131: 4, 160: 5, 224: 6, 247: 7}
+    dict_one_hot_mapping = {5: 0, 41: 1, 60: 2, 88: 3, 131: 4, 160: 5, 224: 6}
     
     minMax = locateMinMax(Point(x=40, y=0, z=0), Point(x=60, y=10, z=20), excludingType)
     print ("minMax is: ", minMax)
@@ -377,16 +371,19 @@ if __name__ == '__main__':
 
     
     ############## Code used to generate training data, will take about 2 days to run ##########
+    testData = []
 
+    # for i in range (1):
+    #     fileName = "buildingData" + str(i) + ".csv"
+    #     genEpisodes(currBuilding, newMinMax[0], newMinMax[1], 1, fileName, testData)
 
-    for i in range (20):
+    
+    for i in range(1):
         fileName = "buildingData" + str(i) + ".csv"
-        genEpisodes(currBuilding, newMinMax[0], newMinMax[1], 100, fileName)
-    
-   
+        fastGenEpisodes(newMinMax[0], newMinMax[1], 1, Point(x=6,y=6,z=6), acceptedBlocks, fileName)
 
-    """
-    
+    # clearOut(Point(x=-20, y=4, z=-20), Point(x=50, y=50, z=50))
+    # client.spawnBlocks(testData[100])
 
 
 
@@ -399,17 +396,20 @@ if __name__ == '__main__':
 
 
 
-
-
-
-
-
     
     ########## Code use to read in csv and test the csv data's correctness #############
     # readResult = read_csv("buildingData0.csv")
     # houseState = readResult.values.tolist()
+    # renderState(houseState[100], Point(x=0, y=10, z=0), Point(x=13, y=13, z=13))
+
+    # for i in range(210):
+    #     renderState(houseState[214 - i], Point(x=0, y=10, z=0), Point(x=13, y=13, z=13))
   
-    #renderState(houseState[214], Point(x=0, y=4, z=0), Point(x=6, y=6, z=6))
+   
+
+
+
+
     
     # readHouse = client.readCube(Cube(min=Point(x=0, y=4, z=0), max=Point(x=6,y=10,z=6)))
     # print("action is: ", actions)
@@ -437,9 +437,7 @@ if __name__ == '__main__':
     #             singleBlockChange(Point(x=i,y=j,z=k), houseState[blockIndex][-1])
     #             blockIndex -= 1
                
-
-    # for i in range(210):
-    #     renderState(houseState[214 - i], Point(x=0, y=10, z=0), Point(x=13, y=13, z=13))
+    
   
     #Big house size is 14 remember
  
