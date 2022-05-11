@@ -13,14 +13,14 @@ print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
 HOUSE_WIDTH = 13
 HOUSE_HEIGHT = 13
 HOUSE_DEPTH = 13
-TARGET_COL = 15380
+TARGET_COL = 15379
 ACTION_SPACE = 7
 MODEL_PATH = "paddedModels/prePaddedModel.h5"
 
 value_map = {5: 0, 41: 1, 60: 2, 88: 3, 131: 4, 160: 5, 224: 6}
 
 # generate column numbers for each column(13 x 13 x 13 = 2197 cubes + 1 target)
-colnames = list(range(0, 2198))
+colnames = list(range(0, 15380))
 
 # read each file in the dataset path and add to a dataframe
 pod_root_path = '../dataset/prePaddedTestCsvs'
