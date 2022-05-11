@@ -15,7 +15,7 @@ HOUSE_HEIGHT = 13
 HOUSE_DEPTH = 13
 TARGET_COL = 2197
 ACTION_SPACE = 8
-MODEL_PATH = "models"
+MODEL_PATH = "models/paddedModel.h5"
 
 '''
 # use this if data is in single CSV file
@@ -73,8 +73,8 @@ for row_idx in range(len(df)):
         print(row_idx)
     cols = df.iloc[row_idx].values
     for col_idx in range(len(cols)):
-        df.iloc[row_idx,col_idx] = value_map.get(cols[col_idx], 8)
-    y[row_idx] = value_map.get(y[row_idx], 8)
+        df.iloc[row_idx,col_idx] = value_map.get(cols[col_idx], 0)
+    y[row_idx] = value_map.get(y[row_idx], 0)
 
 # Convert df to onehot
 print("Converting df to one-hot....")
@@ -91,7 +91,7 @@ for row_idx in range(len(df)):
     new_row = np.array(new_row).reshape(HOUSE_HEIGHT,HOUSE_WIDTH,HOUSE_DEPTH,ACTION_SPACE)
     X.append(new_row)
 
-    y[row_idx] = value_map.get(y[row_idx], 8)
+    y[row_idx] = value_map.get(y[row_idx], 0)
 
 # convert y to onehot
 print("Converting y to one-hot....")
@@ -110,7 +110,7 @@ model = tf.keras.models.Sequential([
         tf.keras.layers.Conv3D(128, 3, activation='relu', padding="SAME"),
         tf.keras.layers.Conv3D(256, 3, activation='relu', padding="SAME"),
         tf.keras.layers.Flatten(),
-        tf.keras.layers.Dense(9, activation='softmax')
+        tf.keras.layers.Dense(8, activation='softmax')
     ])
 model.summary()
 

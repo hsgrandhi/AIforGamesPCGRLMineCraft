@@ -158,7 +158,7 @@ if __name__ == '__main__':
     generateRandomNoiseBlock(Point(x=0,y=4,z=0), 6)
 
     # load the saved model
-    loadedModel = tf.keras.models.load_model('models')
+    loadedModel = tf.keras.models.load_model('models/paddedModel.h5')
     loadedModel.summary()
 
     #######################  need to be fixed without hard-code ###############
