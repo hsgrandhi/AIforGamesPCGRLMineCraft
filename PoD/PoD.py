@@ -319,8 +319,8 @@ if __name__ == '__main__':
 
 
  
-    """
-   
+  
+    
     accurateMin = Point(x=50, y=2, z=10)
     accurateMax = Point(x=53, y=6, z=15)
 
@@ -356,7 +356,7 @@ if __name__ == '__main__':
     
     size = 6
     newMinMax = [moveToCoord, Point(x=moveToCoord.x+5, y=moveToCoord.y+5, z=moveToCoord.z+5)]
-    print(newMinMax)
+   
     
     #Record the current building data to be later spawned so multiple episode can be generated
     
@@ -395,9 +395,9 @@ if __name__ == '__main__':
     #         print(len(row.split(",")))
     #         break
 
+ 
 
 
-    """
 
     #client.spawnBlocks(currBuilding)
 
@@ -405,9 +405,9 @@ if __name__ == '__main__':
 
     
     ########## Code use to read in csv and test the csv data's correctness #############
-    readResult = read_csv("buildingData0.csv")
-    houseState = readResult.values.tolist()
-    renderState(houseState[50], Point(x=0, y=10, z=0), Point(x=13, y=13, z=13))
+    # readResult = read_csv("buildingData0.csv")
+    # houseState = readResult.values.tolist()
+    # renderState(houseState[200], Point(x=0, y=10, z=0), Point(x=13, y=13, z=13))
 
     # for i in range(210):
     #     renderState(houseState[214 - i], Point(x=0, y=10, z=0), Point(x=13, y=13, z=13))

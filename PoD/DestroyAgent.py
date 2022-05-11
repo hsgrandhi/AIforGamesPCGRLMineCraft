@@ -75,9 +75,9 @@ class PoDAgent:
         return action
 
     def makeAMove(self):
-        print("agent current location is: ", self.currPosition)
+       
         #after change or not move on to next target
-        print("min boundary is: ", self.minBoundary)
+        
         if self.currPosition.z + 1 < self.maxBoundary.z + 1:
             self.currPosition.z += 1
         elif self.currPosition.y + 1 < self.maxBoundary.y + 1:
@@ -106,7 +106,7 @@ class PoDAgent:
         return output     
 
    
-    def transformStateActionToCSV1(self, blocks, action, minPoint, acceptedBlocks, fileName = "buildingData0.csv"):
+    def transformStateActionToCSV(self, blocks, action, minPoint, acceptedBlocks, fileName = "buildingData0.csv"):
         
         # block types that we will allow
         acceptedBlocks = [5, 41, 60, 88, 131, 160, 224]
@@ -143,7 +143,7 @@ class PoDAgent:
             writer = csv.writer(f2)
             writer.writerow(flattenedArray2)
 
-    def transformStateActionToCSV(self, blocks, action, minPoint, acceptedBlocks, fileName = "buildingData0.csv"):
+    def transformStateActionToCSV1(self, blocks, action, minPoint, acceptedBlocks, fileName = "buildingData0.csv"):
         
         secondFileName = fileName
         threedArr2 = np.full((13 * 13 * 13), 5)
@@ -181,7 +181,7 @@ class PoDAgent:
                 block.type = self.selectedTiles[randomTile]
 
 
-            tempMinMax = self.generatePadding(self.currPosition, paddingSize, GLASS)
+            tempMinMax = self.generatePadding(self.currPosition, paddingSize, AIR)
             self.clearOut(self.minBoundary, self.maxBoundary, AIR)
             client.spawnBlocks(currHouse)
             finalResult = client.readCube(Cube(min=tempMinMax[0],max=tempMinMax[1]))
