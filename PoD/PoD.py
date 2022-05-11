@@ -177,7 +177,7 @@ def generateStep(agent, paddingSize):
         max=agent.maxBoundary
     ))
     #do padding in order to encode location data
-    tempMinMax = generatePadding(agent.currPosition, paddingSize, GLASS)
+    tempMinMax = generatePadding(agent.currPosition, paddingSize, AIR)
     client.spawnBlocks(blocks)
     finalResult = client.readCube(Cube(
         min=tempMinMax[0],
@@ -224,7 +224,7 @@ def transformStateActionToCSV(blocks, action, minPoint, acceptedBlocks, dictForO
 ############################### Generate other csv without encoding to understand better########################
     secondFileName = fileName
     threedArr2 = np.full((14,14,14), 5)
-    print(threedArr2.shape)
+    #print(threedArr2.shape)
     for block in blocks.blocks:
         #print("index is: ", block.position.x-41, block.position.y-3, block.position.z-11)
         # threedArr[block.position.x-minPoint.x][block.position.y-minPoint.y][block.position.z-minPoint.z] = block.type
@@ -323,7 +323,7 @@ if __name__ == '__main__':
 
 
 
-    """
+    
     
 
     accurateMin = Point(x=50, y=2, z=10)
@@ -355,7 +355,7 @@ if __name__ == '__main__':
     
     #Move the building to a new location and update the new min max location
     # y=4 is the min, if lower, it will destroy the ground layer, while x, z are the origin
-    moveToCoord = Point(x=0,y=10,z=0)
+    moveToCoord = Point(x=0,y=12,z=0)
     
     moveNBT(minMax[0], minMax[1], moveToCoord)
     
@@ -370,8 +370,7 @@ if __name__ == '__main__':
         min=newMinMax[0],
         max=newMinMax[1]
     ))
-    for block in currBuilding.blocks:
-        print(block)
+    
 
 
 
@@ -380,15 +379,15 @@ if __name__ == '__main__':
     ############## Code used to generate training data, will take about 2 days to run ##########
 
 
-    for i in range (1):
-        fileName = "buildingData" + str(6) + ".csv"
-        genEpisodes(currBuilding, newMinMax[0], newMinMax[1], 1, fileName)
+    for i in range (20):
+        fileName = "buildingData" + str(i) + ".csv"
+        genEpisodes(currBuilding, newMinMax[0], newMinMax[1], 100, fileName)
     
    
     
 
 
-    """
+    
 
 
 
@@ -408,8 +407,8 @@ if __name__ == '__main__':
 
     
     ########## Code use to read in csv and test the csv data's correctness #############
-    readResult = read_csv("buildingData6.csv")
-    houseState = readResult.values.tolist()
+    # readResult = read_csv("buildingData6.csv")
+    # houseState = readResult.values.tolist()
   
     #renderState(houseState[214], Point(x=0, y=4, z=0), Point(x=6, y=6, z=6))
     
@@ -440,8 +439,8 @@ if __name__ == '__main__':
     #             blockIndex -= 1
                
 
-    for i in range(210):
-        renderState(houseState[214 - i], Point(x=0, y=10, z=0), Point(x=14, y=14, z=14))
+    # for i in range(210):
+    #     renderState(houseState[214 - i], Point(x=0, y=10, z=0), Point(x=14, y=14, z=14))
   
     #Big house size is 14 remember
  
