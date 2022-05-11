@@ -33,26 +33,30 @@ def generateRandomNoiseBlock(location, size):
     for xAxis in range(location.x, location.x + size):
         for yAxis in range(location.y, location.y + size):
             for zAxis in range(location.z, location.z + size):
-                randomInt = randint(0,7)
+                randomInt = randint(0,6)
                 singleBlockChange(Point(x=xAxis,y=yAxis,z=zAxis), acceptedBlocks[randomInt])
 
 # function to transform blocks into input for the model to predict on
 def transformInputForModel(inputBlocks, oneHotValues):
-
+    X = []
     # initialize the empty array of size (13 x 13 x 13) x 7 -> for one-hot
     threedArr2 = np.full(((13 * 13 * 13), 7), [1,0,0,0,0,0,0])
 
     # fill the array
     index = 0
-    for block in inputBlocks.blocks:
-        threedArr2[index] = oneHotValues[block.type]
+    for block in inputBlocks:
+        inputBlock = block.type
+        if block.type == 93:
+            inputBlock = 5
+        threedArr2[index] = oneHotValues[inputBlock]
         index += 1
 
     # flatten and reshape to correct format
     flattenedArray = threedArr2.flatten()
     finalArray = np.array(flattenedArray).reshape(HOUSE_HEIGHT,HOUSE_WIDTH,HOUSE_DEPTH,ACTION_SPACE)
-    print (finalArray, finalArray.shape)
-    return finalArray
+    X.append(finalArray)
+    X = np.array(X)
+    return X
 
 # main function
 if __name__ == '__main__':
@@ -66,7 +70,7 @@ if __name__ == '__main__':
     generateRandomNoiseBlock(Point(x=0,y=4,z=0), 6)
 
     # load the saved model
-    loadedModel = tf.keras.models.load_model('paddedModels/prePaddedModel.h5')
+    loadedModel = tf.keras.models.load_model('prePaddedModel.h5')
     loadedModel.summary()
 
     # generate oneHotMapping
@@ -89,11 +93,12 @@ if __name__ == '__main__':
                 minPosition = Point(x = xAxis - 6, y = yAxis - 6, z = zAxis - 6 )
                 maxPosition = Point(x = xAxis + 6, y = yAxis + 6, z = zAxis + 6 )
                 inputBlocks = client.readCube(Cube(min=minPosition, max=maxPosition))
+                print("length of Input Blocks:", len(inputBlocks.blocks))
 
                 # transform the block data to model input
-                inputData = transformInputForModel(inputBlocks, oneHotValues)
+                inputData = transformInputForModel(inputBlocks.blocks, oneHotValues)
+                print(inputData.shape)
 
-                '''
                 # Predict the block to replace current position block using the model 
                 predictions = loadedModel.predict(inputData)
                 print("Predictions=", predictions)
@@ -102,9 +107,6 @@ if __name__ == '__main__':
                 predictedNewBlock = np.argmax(predictions, axis = 1)
                 predictedNewBlock = predictedNewBlock[0]
                 print("Predicted new block -> ", predictedNewBlock)
-                '''
-
-                predictedNewBlock = 2
 
                 # dict to map ordinal values to cube types
                 reverseValueMap = {0: 5, 1: 41, 2: 60, 3: 88, 4: 131, 5: 160, 6: 224}
