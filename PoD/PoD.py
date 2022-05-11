@@ -158,7 +158,7 @@ def moveNBT(currMin, currMax, targetMin):
 
 
 def generatePadding(location, size, material):
-    print("generate padding block")
+    #print("generate padding block")
     min = Point(x=location.x - size.x,y=location.y - size.y,z=location.z - size.z)
     max = Point(x=location.x + size.x,y=location.y + size.y,z=location.z + size.z)
     
@@ -223,7 +223,7 @@ def transformStateActionToCSV(blocks, action, minPoint, acceptedBlocks, dictForO
 
 ############################### Generate other csv without encoding to understand better########################
     secondFileName = fileName
-    threedArr2 = np.full((14,14,14), 5)
+    threedArr2 = np.full((13,13,13), 5)
     #print(threedArr2.shape)
     for block in blocks.blocks:
         #print("index is: ", block.position.x-41, block.position.y-3, block.position.z-11)
@@ -324,8 +324,8 @@ if __name__ == '__main__':
 
 
     
-    
 
+    """
     accurateMin = Point(x=50, y=2, z=10)
     accurateMax = Point(x=53, y=6, z=15)
 
@@ -384,9 +384,8 @@ if __name__ == '__main__':
         genEpisodes(currBuilding, newMinMax[0], newMinMax[1], 100, fileName)
     
    
-    
 
-
+    """
     
 
 
@@ -407,7 +406,7 @@ if __name__ == '__main__':
 
     
     ########## Code use to read in csv and test the csv data's correctness #############
-    # readResult = read_csv("buildingData6.csv")
+    # readResult = read_csv("buildingData0.csv")
     # houseState = readResult.values.tolist()
   
     #renderState(houseState[214], Point(x=0, y=4, z=0), Point(x=6, y=6, z=6))
@@ -440,7 +439,12 @@ if __name__ == '__main__':
                
 
     # for i in range(210):
-    #     renderState(houseState[214 - i], Point(x=0, y=10, z=0), Point(x=14, y=14, z=14))
+    #     renderState(houseState[214 - i], Point(x=0, y=10, z=0), Point(x=13, y=13, z=13))
   
     #Big house size is 14 remember
  
+    # with open("buildingData0.csv") as file:
+    #     # for each row in a given file
+    #     for row in file:
+    #         print(len(row.split(",")))
+    #         break
