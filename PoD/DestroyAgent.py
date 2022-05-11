@@ -49,43 +49,7 @@ class PoDAgent:
         return blocks.blocks[0].type
     
 
-    def takeActionWPadding(self):
-        #print ("action is taken")
-        self.generatePadding()
-        coinToss = random.randint(0, 100)
-        
-        
-        #action, which is the original tile type before change been made is recorded here
-        action = self.getBlockType(self.currPosition)
-        #proceed to take next step of destruction
-        #Destruction traverse order is: z -> y -> x
-        if coinToss <= self.coinFlip:
-            #block will be changed to one of the type in tile Selection
-            randomTile = random.randint(0, 7)
-            tileChangeTo = self.selectedTiles[randomTile]
-            self.singleBlockChange(self.currPosition, tileChangeTo)
-        #after change or not move on to next target
-        if self.currPosition.z + 1 < self.maxBoundary.z + 1:
-            self.currPosition.z += 1
-        elif self.currPosition.y + 1 < self.maxBoundary.y + 1:
-            #print("z should reset")
-            self.currPosition.z = self.minBoundary.z
-            self.currPosition.y += 1
-        elif self.currPosition.x + 1 < self.maxBoundary.x + 1:
-            self.currPosition.z = self.minBoundary.z
-            self.currPosition.y = self.minBoundary.y
-            self.currPosition.x += 1
-        #meet maxBoundary
-        else:
-            print("boundary reached")
-            self.reachEnd = True
-            return action
-
-        #print("new location is: ", self.currPosition)
-
-         
-
-        return action
+    
 
     def takeAction(self):
         #print ("action is taken")
@@ -111,7 +75,9 @@ class PoDAgent:
         return action
 
     def makeAMove(self):
+        print("agent current location is: ", self.currPosition)
         #after change or not move on to next target
+        print("min boundary is: ", self.minBoundary)
         if self.currPosition.z + 1 < self.maxBoundary.z + 1:
             self.currPosition.z += 1
         elif self.currPosition.y + 1 < self.maxBoundary.y + 1:
@@ -139,9 +105,49 @@ class PoDAgent:
         output = [min, max]
         return output     
 
+   
+    def transformStateActionToCSV1(self, blocks, action, minPoint, acceptedBlocks, fileName = "buildingData0.csv"):
+        
+        # block types that we will allow
+        acceptedBlocks = [5, 41, 60, 88, 131, 160, 224]
+
+        # dictionary for one-hot mapping
+        dict_one_hot_mapping = {5: 0, 41: 1, 60: 2, 88: 3, 131: 4, 160: 5, 224: 6}
+
+
+        oneHotValues = {}
+        for block in acceptedBlocks:
+            tempOneHot = [0] * (7)
+            oneHotPosition = dict_one_hot_mapping[block]
+            tempOneHot[oneHotPosition] = 1
+            oneHotValues[block] = tempOneHot
+
+
+        secondFileName = fileName
+        threedArr2 = np.full(((13 * 13 * 13), 7), [1,0,0,0,0,0,0])
+        #threedArr2 = np.full((13 * 13 * 13) * 7, [1,0])
+        #print(threedArr2.shape)
+        index = 0
+        for block in blocks.blocks:
+            #print("index is: ", block.position.x-41, block.position.y-3, block.position.z-11)
+            # threedArr[block.position.x-minPoint.x][block.position.y-minPoint.y][block.position.z-minPoint.z] = block.type
+            threedArr2[index] = oneHotValues[block.type]
+            index += 1
+        #print(threedArr)
+        # flatten the array
+        
+        finalArray = threedArr2.flatten()
+        flattenedArray2 = np.append(finalArray, action)
+        
+        with open(secondFileName, "a", newline='') as f2:
+            writer = csv.writer(f2)
+            writer.writerow(flattenedArray2)
+
     def transformStateActionToCSV(self, blocks, action, minPoint, acceptedBlocks, fileName = "buildingData0.csv"):
+        
         secondFileName = fileName
         threedArr2 = np.full((13 * 13 * 13), 5)
+        #threedArr2 = np.full((13 * 13 * 13) * 7, [1,0])
         #print(threedArr2.shape)
         index = 0
         for block in blocks.blocks:
@@ -158,14 +164,14 @@ class PoDAgent:
             writer.writerow(flattenedArray2)
 
     # This is equal to combining the genStep together in one packet
-    def fastAction(self, paddingSize, acceptedBlocks, fileName, result = []):
-        self.currPosition = self.minBoundary
+    def fastAction(self, paddingSize, acceptedBlocks, fileName):
+        self.currPosition = deepcopy(self.minBoundary) 
         currHouse = client.readCube(Cube(min=self.minBoundary,max=self.maxBoundary))
         action = -1
         
         
         for block in currHouse.blocks:
-            print("agent location is: ", self.currPosition)
+            #print("agent location is: ", self.currPosition)
             action = block.type
             coinToss = random.randint(0, 100)
         
@@ -180,102 +186,12 @@ class PoDAgent:
             client.spawnBlocks(currHouse)
             finalResult = client.readCube(Cube(min=tempMinMax[0],max=tempMinMax[1]))
 
-            result.append(finalResult)
-
             output = (finalResult, action)
             self.transformStateActionToCSV(output[0], output[1], self.minBoundary, acceptedBlocks, fileName)
             if not self.reachEnd:
                 self.makeAMove()
         
 
-
-    #take a random action then return the reversed action for record
-    def takeRandomAction(self):
-        coinToss = random.randint(0, 100)
-        if coinToss <= self.coinFlip:
-            randomTile = random.randint(0, 2)
-            randomMove = random.randint(0, 6)
-            # Make a random move while ensure it's within boundary
-            # 0 means x - 1
-            if randomMove == 0 and self.currPosition.x - 1 >= self.minBoundary.x:
-                self.currPosition.x = self.currPosition.x - 1
-                #record block change
-                tileBeforeChange = self.getBlockType(self.currPosition)
-                tileChangeTo = self.selectedTiles[randomTile]
-
-                # make the move-to block change
-                self.singleBlockChange(self.currPosition, tileChangeTo)
-                move = Point(x=1,y=0,z=0)
-                
-                # action include reversed movement, tile type before change, tile type after change
-                return (move, tileBeforeChange, tileChangeTo)
-
-            elif randomMove == 1 and self.currPosition.x + 1 <= self.maxBoundary.x:
-                self.currPosition.x = self.currPosition.x + 1
-              
-                tileBeforeChange = self.getBlockType(self.currPosition)
-                tileChangeTo = self.selectedTiles[randomTile]
-
-               
-                self.singleBlockChange(self.currPosition, tileChangeTo)
-                move = Point(x=1,y=0,z=0)
-                
-                
-                return (move, tileBeforeChange, tileChangeTo)  
-
-            elif randomMove == 2 and self.currPosition.y - 1 >= self.minBoundary.y:
-                self.currPosition.y = self.currPosition.y - 1
-                
-                tileBeforeChange = self.getBlockType(self.currPosition)
-                tileChangeTo = self.selectedTiles[randomTile]
-
-                
-                self.singleBlockChange(self.currPosition, tileChangeTo)
-                move = Point(x=1,y=0,z=0)
-                
-                
-                return (move, tileBeforeChange, tileChangeTo)
-
-            elif randomMove == 3 and self.currPosition.y + 1 <= self.maxBoundary.y:
-                self.currPosition.y = self.currPosition.y - 1
-                
-                tileBeforeChange = self.getBlockType(self.currPosition)
-                tileChangeTo = self.selectedTiles[randomTile]
-
-                
-                self.singleBlockChange(self.currPosition, tileChangeTo)
-                move = Point(x=1,y=0,z=0)
-                
-                
-                return (move, tileBeforeChange, tileChangeTo) 
-
-            elif randomMove == 4 and self.currPosition.z - 1 >= self.minBoundary.z:
-                self.currPosition.z = self.currPosition.z - 1
-              
-                tileBeforeChange = self.getBlockType(self.currPosition)
-                tileChangeTo = self.selectedTiles[randomTile]
-
-              
-                self.singleBlockChange(self.currPosition, tileChangeTo)
-                move = Point(x=1,y=0,z=0)
-                
-                
-                return (move, tileBeforeChange, tileChangeTo) 
-
-            elif randomMove == 4 and self.currPosition.z + 1 <= self.maxBoundary.z:
-                self.currPosition.z = self.currPosition.z + 1
-                
-                tileBeforeChange = self.getBlockType(self.currPosition)
-                tileChangeTo = self.selectedTiles[randomTile]
-
-               
-                self.singleBlockChange(self.currPosition, tileChangeTo)
-                move = Point(x=1,y=0,z=0)
-                
-                return (move, tileBeforeChange, tileChangeTo) 
-
-        else:
-            return
 
 
 

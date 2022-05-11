@@ -257,10 +257,11 @@ def genEpisodes(houseData, min, max, iter = 1, fileName = "buildingData.csv", te
         client.spawnBlocks(houseData)
     
 
-def fastGenEpisodes(min, max, iter = 1, paddingSize = 0, acceptedBlocks = [], fileName = "buildingData.csv", testData = []):
+def fastGenEpisodes(min, max, iter = 1, paddingSize = 0, acceptedBlocks = [], fileName = "buildingData.csv"):
     for i in range(iter):
+        print("begin iteration ", i)
         agent = PoDAgent(min, max)
-        agent.fastAction(paddingSize, acceptedBlocks, fileName, testData)
+        agent.fastAction(paddingSize, acceptedBlocks, fileName)
 
 
 def reverseDestruction(data):
@@ -317,8 +318,8 @@ if __name__ == '__main__':
 
 
 
-
-    
+ 
+    """
    
     accurateMin = Point(x=50, y=2, z=10)
     accurateMax = Point(x=53, y=6, z=15)
@@ -371,7 +372,7 @@ if __name__ == '__main__':
 
     
     ############## Code used to generate training data, will take about 2 days to run ##########
-    testData = []
+    #testData = []
 
     # for i in range (1):
     #     fileName = "buildingData" + str(i) + ".csv"
@@ -381,16 +382,22 @@ if __name__ == '__main__':
     for i in range(1):
         fileName = "buildingData" + str(i) + ".csv"
         fastGenEpisodes(newMinMax[0], newMinMax[1], 1, Point(x=6,y=6,z=6), acceptedBlocks, fileName)
+        
 
     # clearOut(Point(x=-20, y=4, z=-20), Point(x=50, y=50, z=50))
     # client.spawnBlocks(testData[100])
 
+ 
+
+    # with open("buildingData.csv") as file:
+    #     # for each row in a given file
+    #     for row in file:
+    #         print(len(row.split(",")))
+    #         break
 
 
 
-
-
-
+    """
 
     #client.spawnBlocks(currBuilding)
 
@@ -398,9 +405,9 @@ if __name__ == '__main__':
 
     
     ########## Code use to read in csv and test the csv data's correctness #############
-    # readResult = read_csv("buildingData0.csv")
-    # houseState = readResult.values.tolist()
-    # renderState(houseState[100], Point(x=0, y=10, z=0), Point(x=13, y=13, z=13))
+    readResult = read_csv("buildingData0.csv")
+    houseState = readResult.values.tolist()
+    renderState(houseState[50], Point(x=0, y=10, z=0), Point(x=13, y=13, z=13))
 
     # for i in range(210):
     #     renderState(houseState[214 - i], Point(x=0, y=10, z=0), Point(x=13, y=13, z=13))
