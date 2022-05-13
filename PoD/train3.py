@@ -18,7 +18,7 @@ HOUSE_DEPTH = 13
 TARGET_COL = 15379
 ACTION_SPACE = 7
 TRAIN_DATA_COEFFICIENT = 0.90
-MODEL_PATH = "paddedModels/prePaddedModelIterative.h5"
+MODEL_PATH = "paddedModels/prePaddedModelIterativeMultiTest.h5"
 
 # set the directory where the csv files are stored
 dirname = os.path.dirname(__file__)
@@ -85,7 +85,7 @@ def generate_batches(files, batch_size):
             yield input_local, output_local
 
 # set the batch size and create the training and validation generators
-batch_size = 64
+batch_size = 128
 train_generator = generate_batches(files=train_files, batch_size=batch_size)
 test_generator = generate_batches(files=validation_files, batch_size=batch_size)
 print(train_generator, type(train_generator))
@@ -121,11 +121,11 @@ mcp_save = ModelCheckpoint(MODEL_PATH, save_best_only=True, monitor='categorical
 history = model.fit(
     steps_per_epoch=len(train_files),
     use_multiprocessing=True,
-    workers=3,
+    workers=4,
     x=train_dataset,
     verbose=1,
     max_queue_size=32,
-    epochs=100,
+    epochs=200,
     callbacks=[mcp_save],
     validation_data=test_dataset,
     validation_steps=len(validation_files)

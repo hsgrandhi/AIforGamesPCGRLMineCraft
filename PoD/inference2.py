@@ -65,7 +65,7 @@ def transformInputForModel(inputBlocks, oneHotValues):
 if __name__ == '__main__':
 
     # load the saved model
-    loadedModel = tf.keras.models.load_model('/Users/hsgra/Desktop/AIforGamesPCGRLMineCraft/PoD/paddedModels/prePaddedModelIterative.h5')
+    loadedModel = tf.keras.models.load_model('/Users/hsgra/Desktop/AIforGamesPCGRLMineCraft/PoD/paddedModels/prePaddedModelIterativeMultiTest.h5')
     loadedModel.summary()
 
     # clear the world
@@ -73,6 +73,7 @@ if __name__ == '__main__':
     clearMax = Point(x=100, y=100, z=50)
     worldReset(clearMin, clearMax)
 
+    '''
     # load the processed goal house to compare
     base_nbt_path = 'C:/Users/hsgra/Desktop/AIforGamesPCGRLMineCraft/dataset/nbts/'
     nbt_path = "{}/plain_village_house.nbt".format(base_nbt_path)
@@ -90,8 +91,9 @@ if __name__ == '__main__':
     moveNBT(minMax[0], minMax[1], moveToCoord)
     size = 6
     newMinMax = [moveToCoord, Point(x=moveToCoord.x+5, y=moveToCoord.y+5, z=moveToCoord.z+5)]
-
+    '''
     # generate noise block
+    
     generateRandomNoiseBlock(Point(x=0,y=10,z=0), 6)
  
     # generate oneHotMapping
