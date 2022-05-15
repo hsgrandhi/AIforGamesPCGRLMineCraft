@@ -65,7 +65,7 @@ def transformInputForModel(inputBlocks, oneHotValues):
 if __name__ == '__main__':
 
     # load the saved model
-    loadedModel = tf.keras.models.load_model('/Users/hsgra/Desktop/AIforGamesPCGRLMineCraft/PoD/paddedModels/prePaddedModelIterativeMultiTest.h5')
+    loadedModel = tf.keras.models.load_model('/Users/hsgra/Desktop/AIforGamesPCGRLMineCraft/PoD/paddedModels/prePaddedModelIterativeMulti400k.h5')
     loadedModel.summary()
 
     # clear the world

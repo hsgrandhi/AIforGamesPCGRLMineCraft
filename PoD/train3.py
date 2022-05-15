@@ -18,7 +18,7 @@ HOUSE_DEPTH = 13
 TARGET_COL = 15379
 ACTION_SPACE = 7
 TRAIN_DATA_COEFFICIENT = 0.90
-MODEL_PATH = "paddedModels/prePaddedModelIterativeMultiTest.h5"
+MODEL_PATH = "paddedModels/prePaddedModelIterativeMulti400k.h5"
 
 # set the directory where the csv files are stored
 dirname = os.path.dirname(__file__)
@@ -125,7 +125,7 @@ history = model.fit(
     x=train_dataset,
     verbose=1,
     max_queue_size=32,
-    epochs=200,
+    epochs=500,
     callbacks=[mcp_save],
     validation_data=test_dataset,
     validation_steps=len(validation_files)

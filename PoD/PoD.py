@@ -13,6 +13,7 @@ from DestroyAgent import *
 import csv
 import pandas as pd
 from pandas import *
+import os
 
 channel = grpc.insecure_channel('localhost:5001')
 client = minecraft_pb2_grpc.MinecraftServiceStub(channel)
@@ -324,50 +325,50 @@ if __name__ == '__main__':
  
   
     
-    accurateMin = Point(x=50, y=2, z=10)
-    accurateMax = Point(x=53, y=6, z=15)
+    # accurateMin = Point(x=50, y=2, z=10)
+    # accurateMax = Point(x=53, y=6, z=15)
 
-    #print(accurateLoc)
-    excludingType = [5, 93, 10, 60]
+    # #print(accurateLoc)
+    # excludingType = [5, 93, 10, 60]
 
-    # block types that we will allow
-    acceptedBlocks = [5, 41, 60, 88, 131, 160, 224]
+    # # block types that we will allow
+    # acceptedBlocks = [5, 41, 60, 88, 131, 160, 224]
 
-    # dictionary for one-hot mapping
-    dict_one_hot_mapping = {5: 0, 41: 1, 60: 2, 88: 3, 131: 4, 160: 5, 224: 6}
+    # # dictionary for one-hot mapping
+    # dict_one_hot_mapping = {5: 0, 41: 1, 60: 2, 88: 3, 131: 4, 160: 5, 224: 6}
     
-    minMax = locateMinMax(Point(x=40, y=0, z=0), Point(x=60, y=10, z=20), excludingType)
-    print ("minMax is: ", minMax)
+    # minMax = locateMinMax(Point(x=40, y=0, z=0), Point(x=60, y=10, z=20), excludingType)
+    # print ("minMax is: ", minMax)
     
  
 
-    ############## Code used to move the building to correct location and preprocess it contained tiles ##########
+    # ############## Code used to move the building to correct location and preprocess it contained tiles ##########
   
-    #use this processing function to swap out unwant blocks
-    # nbtProcessing(minMax[0], minMax[1], currentBlocks)
-    nbtProcessing(minMax[0], minMax[1], acceptedBlocks)
+    # #use this processing function to swap out unwant blocks
+    # # nbtProcessing(minMax[0], minMax[1], currentBlocks)
+    # nbtProcessing(minMax[0], minMax[1], acceptedBlocks)
 
-    sizeX = minMax[1].x - minMax[0].x + 1
-    sizeY = minMax[1].y - minMax[0].y + 1
-    sizeZ = minMax[1].z - minMax[0].z + 1
+    # sizeX = minMax[1].x - minMax[0].x + 1
+    # sizeY = minMax[1].y - minMax[0].y + 1
+    # sizeZ = minMax[1].z - minMax[0].z + 1
     
-    #Move the building to a new location and update the new min max location
-    # y=4 is the min, if lower, it will destroy the ground layer, while x, z are the origin
-    moveToCoord = Point(x=0,y=12,z=0)
+    # #Move the building to a new location and update the new min max location
+    # # y=4 is the min, if lower, it will destroy the ground layer, while x, z are the origin
+    # moveToCoord = Point(x=0,y=12,z=0)
     
-    moveNBT(minMax[0], minMax[1], moveToCoord)
+    # moveNBT(minMax[0], minMax[1], moveToCoord)
     
-    size = 6
-    newMinMax = [moveToCoord, Point(x=moveToCoord.x+5, y=moveToCoord.y+5, z=moveToCoord.z+5)]
+    # size = 6
+    # newMinMax = [moveToCoord, Point(x=moveToCoord.x+5, y=moveToCoord.y+5, z=moveToCoord.z+5)]
    
     
-    #Record the current building data to be later spawned so multiple episode can be generated
+    # #Record the current building data to be later spawned so multiple episode can be generated
     
     
-    currBuilding = client.readCube(Cube(
-        min=newMinMax[0],
-        max=newMinMax[1]
-    ))
+    # currBuilding = client.readCube(Cube(
+    #     min=newMinMax[0],
+    #     max=newMinMax[1]
+    # ))
     
 
 
@@ -382,9 +383,9 @@ if __name__ == '__main__':
     #     genEpisodes(currBuilding, newMinMax[0], newMinMax[1], 1, fileName, testData)
 
     
-    for i in range(2):
-        fileName = "buildingData" + str(i) + ".csv"
-        fastGenEpisodes(currBuilding, newMinMax[0], newMinMax[1], 50, Point(x=6,y=6,z=6), acceptedBlocks, fileName)
+    # for i in range(2):
+    #     fileName = "buildingData" + str(i) + ".csv"
+    #     fastGenEpisodes(currBuilding, newMinMax[0], newMinMax[1], 50, Point(x=6,y=6,z=6), acceptedBlocks, fileName)
         
 
     # clearOut(Point(x=-20, y=4, z=-20), Point(x=50, y=50, z=50))
@@ -408,9 +409,12 @@ if __name__ == '__main__':
 
     
     ########## Code use to read in csv and test the csv data's correctness #############
-    # readResult = read_csv("buildingData0.csv")
-    # houseState = readResult.values.tolist()
-    # renderState(houseState[200], Point(x=0, y=10, z=0), Point(x=13, y=13, z=13))
+    # set the directory where the csv files are stored
+    dirname = os.path.dirname(__file__)
+    INPUT_DATA_DIR = os.path.join(dirname, 'prePaddedIterativeData/')
+    readResult = read_csv(INPUT_DATA_DIR + "buildingData0.csv")
+    houseState = readResult.values.tolist()
+    renderState(houseState[432], Point(x=0, y=10, z=0), Point(x=13, y=13, z=13))
 
     # for i in range(210):
     #     renderState(houseState[214 - i], Point(x=0, y=10, z=0), Point(x=13, y=13, z=13))
